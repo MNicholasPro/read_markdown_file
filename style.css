@@ -1,0 +1,213 @@
+:root {
+    --primary-hue: 210;
+    --bg-gradient: linear-gradient(135deg, hsl(var(--primary-hue), 70%, 60%), hsl(calc(var(--primary-hue) + 40), 70%, 60%));
+    --glass-bg: rgba(255, 255, 255, 0.15);
+    --glass-border: rgba(255, 255, 255, 0.3);
+    --text-color: #ffffff;
+    --accent-color: #fff;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    height: 100vh;
+    overflow: hidden;
+    background: var(--bg-gradient);
+    transition: background 0.5s ease;
+    color: var(--text-color);
+}
+
+#app {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+}
+
+/* Title Bar */
+#title-bar {
+    height: 40px;
+    background: rgba(0, 0, 0, 0.2);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    -webkit-app-region: drag;
+    padding: 0 15px;
+}
+
+.app-title {
+    font-size: 14px;
+    font-weight: 600;
+    opacity: 0.8;
+}
+
+.window-controls {
+    display: flex;
+    gap: 10px;
+    -webkit-app-region: no-drag;
+}
+
+.window-controls button {
+    background: transparent;
+    border: none;
+    color: white;
+    font-size: 18px;
+    cursor: pointer;
+    width: 30px;
+    height: 30px;
+    border-radius: 4px;
+    transition: background 0.2s;
+}
+
+.window-controls button:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+#btn-close:hover {
+    background: #ff5f56 !important;
+}
+
+/* Main Layout */
+#main-container {
+    display: flex;
+    flex: 1;
+    padding: 20px;
+    gap: 20px;
+    height: calc(100vh - 40px);
+}
+
+/* Control Panel (Glassmorphism) */
+#control-panel {
+    width: 260px;
+    background: var(--glass-bg);
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
+    border: 1px solid var(--glass-border);
+    border-radius: 16px;
+    display: flex;
+    flex-direction: column;
+    padding: 20px;
+    gap: 30px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+}
+
+.panel-section h3 {
+    font-size: 16px;
+    margin-bottom: 15px;
+    opacity: 0.9;
+}
+
+.primary-btn, .secondary-btn {
+    width: 100%;
+    padding: 10px;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    font-weight: 600;
+    transition: transform 0.2s, opacity 0.2s;
+}
+
+.primary-btn {
+    background: white;
+    color: #333;
+}
+
+.secondary-btn {
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+    border: 1px solid var(--glass-border);
+    margin-top: 10px;
+}
+
+.primary-btn:hover, .secondary-btn:hover {
+    transform: translateY(-2px);
+    opacity: 0.9;
+}
+
+input[type="range"] {
+    width: 100%;
+    cursor: pointer;
+}
+
+.footer {
+    margin-top: auto;
+    font-size: 12px;
+    text-align: center;
+    opacity: 0.6;
+}
+
+/* Content Area (Glassmorphism) */
+#content-viewer {
+    flex: 1;
+    background: var(--glass-bg);
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
+    border: 1px solid var(--glass-border);
+    border-radius: 16px;
+    overflow-y: auto;
+    padding: 40px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+}
+
+.markdown-body {
+    max-width: 900px;
+    margin: 0 auto;
+    line-height: 1.6;
+    font-size: 18px;
+}
+
+.welcome-screen {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    text-align: center;
+    opacity: 0.7;
+}
+
+/* Markdown Styling */
+.markdown-body h1, .markdown-body h2, .markdown-body h3 {
+    margin-top: 24px;
+    margin-bottom: 16px;
+    border-bottom: 1px solid var(--glass-border);
+    padding-bottom: 0.3em;
+}
+
+.markdown-body p {
+    margin-bottom: 16px;
+}
+
+.markdown-body code {
+    background: rgba(0,0,0,0.3);
+    padding: 2px 4px;
+    border-radius: 4px;
+    font-family: 'Consolas', monospace;
+}
+
+.markdown-body pre {
+    background: #1e1e1e;
+    padding: 16px;
+    border-radius: 8px;
+    overflow-x: auto;
+    margin-bottom: 16px;
+}
+
+.markdown-body img {
+    max-width: 100%;
+    border-radius: 8px;
+}
+
+/* Mermaid Diagram Styling */
+.mermaid {
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    margin: 20px 0;
+    display: flex;
+    justify-content: center;
+}

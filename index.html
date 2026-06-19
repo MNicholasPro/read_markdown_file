@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Professional Markdown Reader</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+</head>
+<body>
+    <div id="app">
+        <!-- Custom Title Bar -->
+        <header id="title-bar">
+            <div class="drag-region">
+                <span class="app-title">Markdown Pro Reader</span>
+            </div>
+            <div class="window-controls">
+                <button id="btn-minimize">—</button>
+                <button id="btn-maximize">▢</button>
+                <button id="btn-close">×</button>
+            </div>
+        </header>
+
+        <main id="main-container">
+            <!-- Control Panel -->
+            <aside id="control-panel">
+                <div class="panel-section">
+                    <h3>Files</h3>
+                    <button id="btn-open" class="primary-btn">Open Markdown File</button>
+                </div>
+                <div class="panel-section">
+                    <h3>Appearance</h3>
+                    <label for="bg-color">Theme Hue</label>
+                    <input type="range" id="bg-hue" min="0" max="360" value="210">
+                    <button id="btn-random-bg" class="secondary-btn">Random Background</button>
+                </div>
+                <div class="panel-section footer">
+                    <p>v1.0.0 | Glassmorphism UI</p>
+                </div>
+            </aside>
+
+            <!-- Content Area -->
+            <section id="content-viewer">
+                <div id="markdown-body" class="markdown-body">
+                    <div class="welcome-screen">
+                        <h1>Welcome to Markdown Pro</h1>
+                        <p>Please open a markdown file to start reading.</p>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Libraries -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <script src="renderer.js"></script>
+</body>
+</html>
