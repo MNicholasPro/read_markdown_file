@@ -217,3 +217,60 @@ mermaid.initialize({
     theme: 'default',
     securityLevel: 'loose' 
 });
+
+// 在你的点击 Fullscreen 按钮的事件处理器中
+function openFullscreen(svgElement) {
+    // 创建一个全屏遮罩层
+    const overlay = document.createElement('div');
+    overlay.id = 'fullscreen-overlay';
+    overlay.style.cssText = `
+        position: fixed;
+        top: 0; left: 0; width: 100vw; height: 100vh;
+        background: ${document.body.classList.contains('dark') ? '#1a1a1a' : '#f5f5f5'};
+        z-index: 9999;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: zoom-out;
+    `;
+
+    // 创建容器以支持缩放和居中
+    const container = document.createElement('div');
+    container.className = 'fullscreen-container';
+    
+    // 克隆 SVG 以免从原页面移除
+    const clonedSvg = svgElement.cloneNode(true);
+    clonedSvg.style.width = 'auto';
+    clonedSvg.style.height = 'auto';
+    clonedSvg.style.maxWidth = '90vw';
+    clonedSvg.style.maxHeight = '90vh';
+    
+    // 创建关闭按钮
+    const closeBtn = document.createElement('button');
+    closeBtn.innerText = '✕ Close';
+    closeBtn.id = 'fullscreen-close-btn';
+    closeBtn.style.cssText = `
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        padding: 10px 20px;
+        background: #ff4d4f;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-weight: bold;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+    `;
+
+    container.appendChild(clonedSvg);
+    overlay.appendChild(container);
+    overlay.appendChild(closeBtn);
+
+    // 关闭逻辑
+    const close = () => document.body.removeChild(overlay);
+    closeBtn.onclick = close;
+    overlay.onclick = (e) => { if(e.target === overlay || e.target === container) close(); };
+
+    document.body.appendChild(overlay);
+}
