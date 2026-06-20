@@ -61,56 +61,73 @@ async function renderMarkdown() {
     const contentViewer = document.getElementById('markdown-body');
     
     try {
-        // 1. Open File Dialog
         const filePath = await ipcRenderer.invoke('open-file');
         if (!filePath) return;
 
-        // 2. Read File Content
         const rawContent = await ipcRenderer.invoke('read-file', filePath);
-        
-        // 3. Convert Markdown to HTML
         let htmlContent = marked.parse(rawContent);
         contentViewer.innerHTML = htmlContent;
 
-        // 4. Process Mermaid Diagrams
-        // We look for <pre><code class="language-mermaid">...</code></pre> blocks
         const mermaidBlocks = contentViewer.querySelectorAll('pre code.language-mermaid');
         
         for (let block of mermaidBlocks) {
             const pre = block.parentElement;
             const mermaidCode = block.textContent;
             
-            // 1. 创建一个大容器来包裹整个图表区域
             const wrapperDiv = document.createElement('div');
             wrapperDiv.className = 'mermaid-wrapper';
-            wrapperDiv.style.position = 'relative'; // 确保按钮能绝对定位
-
-            // 2. 创建控制按钮层 (独立于 mermaid 代码)
+            
+            // 修改点 1: 移除 onclick，改为使用 data- 属性存储代码
             const controlsDiv = document.createElement('div');
             controlsDiv.className = 'mermaid-controls';
             controlsDiv.innerHTML = `
-                <button class="mermaid-btn" onclick="viewInFullscreen('${escapeHtml(mermaidCode)}')">🔍 Fullscreen</button>
-                <button class="mermaid-btn" onclick="exportDiagram('${escapeHtml(mermaidCode)}')">💾 Export</button>
+                <button class="mermaid-btn btn-fullscreen" data-code="${escapeHtml(mermaidCode)}">🔍 Fullscreen</button>
+                <button class="mermaid-btn btn-export" data-code="${escapeHtml(mermaidCode)}">💾 Export</button>
             `;
             
-            // 3. 创建纯净的 Mermaid 渲染区域 (只放代码文本)
             const mermaidDiv = document.createElement('div');
             mermaidDiv.className = 'mermaid';
-            mermaidDiv.textContent = mermaidCode; // <--- 关键：使用 textContent 确保没有 HTML 标签
+            mermaidDiv.textContent = mermaidCode;
             
-            // 组装结构
             wrapperDiv.appendChild(controlsDiv);
             wrapperDiv.appendChild(mermaidDiv);
-            
             pre.replaceWith(wrapperDiv);
         }
 
-        // Trigger Mermaid rendering
         await mermaid.run();
         
     } catch (error) {
         console.error('Error rendering markdown:', error);
         alert('Failed to load the markdown file.');
+    }
+}
+// 修改点 2: 使用事件委托处理点击
+document.addEventListener('click', async (e) => {
+    if (e.target.classList.contains('btn-fullscreen')) {
+        const code = e.target.getAttribute('data-code');
+        await viewInFullscreen(code);
+    } else if (e.target.classList.contains('btn-export')) {
+        const code = e.target.getAttribute('data-code');
+        await exportDiagram(code);
+    }
+});
+// 修改点 3: 将函数改为普通的 async function 即可，不再强制绑定 window
+async function viewInFullscreen(mermaidCode) {
+    try {
+        await renderMermaidInFullscreen(mermaidCode);
+        fullscreenDialog.showModal();
+    } catch (error) {
+        console.error('Error rendering full screen diagram:', error);
+    }
+}
+
+async function exportDiagram(mermaidCode) {
+    try {
+        // 注意：@electron/remote 需要在主进程配置，这里先提供功能提示
+        alert('Exporting diagram...\n\nFunctionality: Rendering to SVG and triggering system save dialog.');
+        console.log('Exporting this code:', mermaidCode);
+    } catch (error) {
+        console.error('Error exporting diagram:', error);
     }
 }
 

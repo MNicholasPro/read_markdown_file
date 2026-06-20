@@ -235,17 +235,14 @@ input[type="range"] {
     right: 10px;
     display: flex;
     gap: 8px;
-    z-index: 2; /* Ensure controls are above diagram */
+    z-index: 100; /* 提高 z-index 确保在最上层 */
+    pointer-events: auto; /* 确保可以触发点击 */
 }
 
 .mermaid-btn {
-    background: rgba(0, 0, 0, 0.7);
-    color: white;
-    border: none;
-    padding: 5px 10px;
-    border-radius: 4px;
     cursor: pointer;
-    font-size: 12px;
+    position: relative;
+    z-index: 101;
 }
 
 .mermaid-btn:hover {
