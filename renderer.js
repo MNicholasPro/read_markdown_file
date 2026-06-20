@@ -108,6 +108,7 @@ async function renderMarkdown() {
 
         await mermaid.run();
         
+        
     } catch (error) {
         console.error('Error rendering markdown:', error);
     }
@@ -211,6 +212,44 @@ async function renderMermaidInFullscreen(mermaidCode) {
 }
 
 document.getElementById('btn-open').onclick = renderMarkdown;
+
+// 在 renderer.js 中添加
+function createZoomButtons() {
+    const container = document.createElement('div');
+    container.id = 'mermaid-zoom-controls';
+    container.innerHTML = `
+        <button id="zoom-in">+</button>
+        <button id="zoom-out">−</button>
+        <button id="zoom-reset">Reset</button>
+    `;
+    document.body.appendChild(container);
+
+    // 绑定事件
+    document.getElementById('zoom-in').onclick = () => zoomElement(1.2);
+    document.getElementById('zoom-out').onclick = () => zoomElement(0.8);
+    document.getElementById('zoom-reset').onclick = () => zoomElement(1, true);
+}
+
+function zoomElement(scale, reset = false) {
+    // 寻找当前可见/激活的 svg
+    const svg = document.querySelector('.mermaid svg');
+    if (!svg) return;
+
+    if (reset) {
+        svg.style.transform = 'scale(1)';
+        svg.style.transformOrigin = 'center';
+        return;
+    }
+
+    // 获取当前缩放倍数并计算
+    const currentScale = parseFloat(svg.style.transform.replace('scale(', '').replace(')', '')) || 1;
+    svg.style.transform = `scale(${currentScale * scale})`;
+    svg.style.transformOrigin = 'center';
+    svg.style.transition = 'transform 0.2s ease';
+}
+
+// 页面加载完成后立即创建按钮（虽然初始是隐藏的）
+window.addEventListener('DOMContentLoaded', createZoomButtons);
 
 mermaid.initialize({ 
     startOnLoad: false, 
