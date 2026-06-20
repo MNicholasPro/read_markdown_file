@@ -80,20 +80,29 @@ async function renderMarkdown() {
             const pre = block.parentElement;
             const mermaidCode = block.textContent;
             
-            // Create a div for mermaid to render into
-            const mermaidDiv = document.createElement('div');
-            mermaidDiv.className = 'mermaid';
-            mermaidDiv.innerHTML = `<div class="mermaid-controls">
+            // 1. 创建一个大容器来包裹整个图表区域
+            const wrapperDiv = document.createElement('div');
+            wrapperDiv.className = 'mermaid-wrapper';
+            wrapperDiv.style.position = 'relative'; // 确保按钮能绝对定位
+
+            // 2. 创建控制按钮层 (独立于 mermaid 代码)
+            const controlsDiv = document.createElement('div');
+            controlsDiv.className = 'mermaid-controls';
+            controlsDiv.innerHTML = `
                 <button class="mermaid-btn" onclick="viewInFullscreen('${escapeHtml(mermaidCode)}')">🔍 Fullscreen</button>
                 <button class="mermaid-btn" onclick="exportDiagram('${escapeHtml(mermaidCode)}')">💾 Export</button>
-            </div>`;
+            `;
             
-            // Create a container to hold the diagram
-            const diagramContainer = document.createElement('div');
-            diagramContainer.className = 'diagram-container';
-            diagramContainer.appendChild(mermaidDiv);
+            // 3. 创建纯净的 Mermaid 渲染区域 (只放代码文本)
+            const mermaidDiv = document.createElement('div');
+            mermaidDiv.className = 'mermaid';
+            mermaidDiv.textContent = mermaidCode; // <--- 关键：使用 textContent 确保没有 HTML 标签
             
-            pre.replaceWith(diagramContainer);
+            // 组装结构
+            wrapperDiv.appendChild(controlsDiv);
+            wrapperDiv.appendChild(mermaidDiv);
+            
+            pre.replaceWith(wrapperDiv);
         }
 
         // Trigger Mermaid rendering
