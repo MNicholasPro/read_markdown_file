@@ -7,6 +7,15 @@
     --accent-color: #fff;
 }
 
+/* Dark Theme Variables */
+[data-theme="dark"] {
+    --bg-gradient: linear-gradient(135deg, hsl(var(--primary-hue), 70%, 20%), hsl(calc(var(--primary-hue) + 40), 70%, 20%));
+    --glass-bg: rgba(0, 0, 0, 0.25);
+    --glass-border: rgba(255, 255, 255, 0.1);
+    --text-color: #f0f0f0;
+    --accent-color: #e0e0e0;
+}
+
 * {
     box-sizing: border-box;
     margin: 0;
@@ -20,6 +29,7 @@ body {
     background: var(--bg-gradient);
     transition: background 0.5s ease;
     color: var(--text-color);
+    position: relative;
 }
 
 #app {
@@ -37,6 +47,7 @@ body {
     align-items: center;
     -webkit-app-region: drag;
     padding: 0 15px;
+    z-index: 100; /* Ensure title bar is on top */
 }
 
 .app-title {
@@ -78,6 +89,7 @@ body {
     padding: 20px;
     gap: 20px;
     height: calc(100vh - 40px);
+    position: relative; /* Ensure proper layering */
 }
 
 /* Control Panel (Glassmorphism) */
@@ -93,6 +105,7 @@ body {
     padding: 20px;
     gap: 30px;
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    z-index: 10; /* Ensure control panel is above content */
 }
 
 .panel-section h3 {
@@ -151,6 +164,7 @@ input[type="range"] {
     overflow-y: auto;
     padding: 40px;
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    z-index: 5; /* Ensure content area is above background */
 }
 
 .markdown-body {
@@ -210,4 +224,85 @@ input[type="range"] {
     margin: 20px 0;
     display: flex;
     justify-content: center;
+    position: relative;
+    z-index: 1; /* Ensure diagrams are on top */
+}
+
+/* Mermaid Controls */
+.mermaid-controls {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    display: flex;
+    gap: 8px;
+    z-index: 2; /* Ensure controls are above diagram */
+}
+
+.mermaid-btn {
+    background: rgba(0, 0, 0, 0.7);
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 12px;
+}
+
+.mermaid-btn:hover {
+    background: rgba(0, 0, 0, 0.9);
+}
+
+/* Fullscreen Dialog - 修改这里 */
+.fullscreen-dialog {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.9);
+    border: none;
+    border-radius: 0;
+    padding: 0;
+    /* 移除这里的 display: flex; */
+}
+
+/* 只有当 dialog 被打开 (带有 open 属性) 时才显示为 flex 布局 */
+.fullscreen-dialog[open] {
+    display: flex;
+    flex-direction: column;
+}
+
+.fullscreen-dialog::backdrop {
+    background: rgba(0, 0, 0, 0.9);
+}
+
+#btn-close-fullscreen {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    background: none;
+    border: none;
+    color: white;
+    font-size: 32px;
+    cursor: pointer;
+    z-index: 1001; /* Ensure close button is above everything */
+}
+
+#fullscreen-content {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+}
+
+/* Dark Theme */
+[data-theme="dark"] .markdown-body h1,
+[data-theme="dark"] .markdown-body h2,
+[data-theme="dark"] .markdown-body h3 {
+    border-bottom-color: var(--glass-border);
+}
+
+[data-theme="dark"] .mermaid {
+    background: #2d2d2d;
 }

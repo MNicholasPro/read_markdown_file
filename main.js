@@ -2,11 +2,16 @@ const { app, BrowserWindow, ipcMain, dialog } = require('electron');
 const path = require('path');
 const fs = require('fs');
 
+// Handle creating/removing shortcuts on Windows when installing/uninstalling.
+if (require('electron-squirrel-startup')) {
+  app.quit();
+}
+
 function createWindow() {
   const win = new BrowserWindow({
     width: 1200,
     height: 800,
-    frame: false, // Frameless for a more modern look
+    frame: false, // Frameless for a more  modern look
     webPreferences: {
       nodeIntegration: true,
       contextIsolation: false,
@@ -16,7 +21,21 @@ function createWindow() {
   win.loadFile('index.html');
 }
 
-app.whenReady().then(createWindow);
+app.on('ready', () => {
+  createWindow();
+
+  app.on('activate', () => {
+    if (BrowserWindow.getAllWindows().length === 0) {
+      createWindow();
+    }
+  });
+});
+
+app.on('window-all-closed', () => {
+  if (process.platform !== 'darwin') {
+    app.quit();
+  }
+});
 
 ipcMain.on('window-control', (event, action) => {
   const win = BrowserWindow.getFocusedWindow();
@@ -56,8 +75,3 @@ ipcMain.handle('read-file', async (event, filePath) => {
     throw error;
   }
 });
-
-app.on('window-all-closed', () => {
-  if (process.platform !== 'darwin') app.quit();
-});
-
