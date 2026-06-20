@@ -61,6 +61,14 @@
         </dialog>
     </div>
 
+
+    <!-- 缩放控制面板 -->
+    <div id="zoom-controls" style="display: none; position: fixed; bottom: 20px; right: 20px; z-index: 1000; display: flex; gap: 10px; background: rgba(0,0,0,0.5); padding: 10px; border-radius: 8px; backdrop-filter: blur(5px);">
+        <button id="zoom-in" style="width: 40px; height: 40px; cursor: pointer; border-radius: 50%; border: none; background: white; font-weight: bold;">+</button>
+        <button id="zoom-out" style="width: 40px; height: 40px; cursor: pointer; border-radius: 50%; border: none; background: white; font-weight: bold;">-</button>
+        <button id="zoom-reset" style="width: 40px; height: 40px; cursor: pointer; border-radius: 50%; border: none; background: white; font-weight: bold;">↺</button>
+    </div>
+
     <!-- Libraries -->
     <script src="https://cdn.jsdelivr.net/npm/svg-pan-zoom@3.6.1/dist/svg-pan-zoom.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>

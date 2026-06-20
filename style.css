@@ -378,43 +378,21 @@ input[type="range"] {
     /* 移除原有的 position: relative; */
 }
 
-/* 确保 Mermaid 容器可以滚动 */
+/* 确保全屏容器允许内容溢出并可滚动 */
 .mermaid {
-    overflow: auto;
-    max-width: 100%;
-    display: block;
-}
-.mermaid svg {
-    transition: transform 0.2s ease;
-    transform-origin: center center; /* 或者 0 0 */
-}
-
-#mermaid-zoom-controls {
-    position: fixed;
-    bottom: 20px;
-    right: 20px;
+    overflow: auto !important;
     display: flex;
-    gap: 10px;
-    z-index: 9999;
-    background: rgba(255, 255, 255, 0.8);
-    padding: 10px;
-    border-radius: 8px;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.2);
-    backdrop-filter: blur(4px);
+    justify-content: center;
+    align-items: center;
+    padding: 50px; /* 给缩放留出空间 */
 }
 
-#mermaid-zoom-controls button {
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    border: 1px solid #ccc;
-    background: white;
-    cursor: pointer;
-    font-size: 20px;
-    font-weight: bold;
-    transition: background 0.2s;
+.mermaid svg {
+    max-width: none !important; /* 覆盖默认的 100% 限制，否则无法放大 */
+    height: auto !important;
 }
 
-#mermaid-zoom-controls button:hover {
+#zoom-controls button:hover {
     background: #eee;
+    box-shadow: 0 0 5px rgba(0,0,0,0.2);
 }

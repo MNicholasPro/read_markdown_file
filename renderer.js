@@ -313,3 +313,53 @@ function openFullscreen(svgElement) {
 
     document.body.appendChild(overlay);
 }
+
+// --- 缩放状态管理 ---
+let currentScale = 1;
+const zoomControls = document.getElementById('zoom-controls');
+
+function updateZoom() {
+    // 针对所有 mermaid 图表进行缩放
+    const diagrams = document.querySelectorAll('.mermaid svg');
+    diagrams.forEach(svg => {
+        svg.style.transform = `scale(${currentScale})`;
+        svg.style.transformOrigin = 'center center';
+        svg.style.transition = 'transform 0.2s ease';
+    });
+}
+
+document.getElementById('zoom-in').addEventListener('click', () => {
+    currentScale += 0.2;
+    updateZoom();
+});
+
+document.getElementById('zoom-out').addEventListener('click', () => {
+    currentScale = Math.max(0.2, currentScale - 0.2);
+    updateZoom();
+});
+
+document.getElementById('zoom-reset').addEventListener('click', () => {
+    currentScale = 1;
+    updateZoom();
+});
+
+// --- 修改 Fullscreen 逻辑 ---
+// 假设你有一个触发 Fullscreen 的函数或按钮
+function toggleFullscreen() {
+    // 这里是你的全屏逻辑 (例如进入某个 modal 或使用 requestFullscreen)
+    // 关键点：控制缩放按钮的显示/隐藏
+    const isFull = !zoomControls.style.display || zoomControls.style.display === 'flex';
+    
+    if (isFull) {
+        // 退出全屏
+        zoomControls.style.display = 'none';
+        currentScale = 1; // 重置缩放
+        updateZoom();
+    } else {
+        // 进入全屏
+        zoomControls.style.display = 'flex';
+    }
+}
+
+// 如果你是通过某个按钮进入全屏的，请绑定它
+document.getElementById('btn-fullscreen').addEventListener('click', toggleFullscreen);
