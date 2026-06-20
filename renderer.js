@@ -40,22 +40,32 @@ const fullscreenDialog = document.getElementById('mermaid-fullscreen');
 const fullscreenContent = document.getElementById('fullscreen-content');
 const closeFullscreenBtn = document.getElementById('btn-close-fullscreen');
 
-// Close fullscreen dialog
 closeFullscreenBtn.onclick = () => {
     fullscreenDialog.close();
 };
 
-// Handle window resize for fullscreen
 window.addEventListener('resize', () => {
     if (fullscreenDialog.open) {
-        // Re-render diagram in fullscreen when window is resized
-        const currentDiagram = fullscreenContent.querySelector('.mermaid');
-        if (currentDiagram) {
-            const mermaidCode = currentDiagram.textContent;
-            renderMermaidInFullscreen(mermaidCode);
+        // 此时我们需要从 DOM 中找回原始代码重新渲染
+        const mermaidDiv = document.getElementById('fullscreen-mermaid');
+        if (mermaidDiv) {
+            // 注意：mermaid 渲染后会把文本替换成 SVG，
+            // 所以我们需要在渲染前把原始文本存起来，或者从 data 属性读
+            const code = mermaidDiv.getAttribute('data-original-code');
+            if (code) renderMermaidInFullscreen(code);
         }
     }
 });
+
+// 辅助函数：将代码存入临时存储，避免 HTML 属性导致的转义问题
+const mermaidCodeStore = new Map();
+let codeCounter = 0;
+
+function getCodeId(code) {
+    const id = `mermaid-code-${codeCounter++}`;
+    mermaidCodeStore.set(id, code);
+    return id;
+}
 
 async function renderMarkdown() {
     const contentViewer = document.getElementById('markdown-body');
@@ -74,15 +84,17 @@ async function renderMarkdown() {
             const pre = block.parentElement;
             const mermaidCode = block.textContent;
             
+            // 关键点 1: 不把代码直接放在 data-code 属性里，而是存入 Map
+            const codeId = getCodeId(mermaidCode);
+            
             const wrapperDiv = document.createElement('div');
             wrapperDiv.className = 'mermaid-wrapper';
             
-            // 修改点 1: 移除 onclick，改为使用 data- 属性存储代码
             const controlsDiv = document.createElement('div');
             controlsDiv.className = 'mermaid-controls';
             controlsDiv.innerHTML = `
-                <button class="mermaid-btn btn-fullscreen" data-code="${escapeHtml(mermaidCode)}">🔍 Fullscreen</button>
-                <button class="mermaid-btn btn-export" data-code="${escapeHtml(mermaidCode)}">💾 Export</button>
+                <button class="mermaid-btn btn-fullscreen" data-code-id="${codeId}">🔍 Fullscreen</button>
+                <button class="mermaid-btn btn-export" data-code-id="${codeId}">💾 Export</button>
             `;
             
             const mermaidDiv = document.createElement('div');
@@ -98,32 +110,64 @@ async function renderMarkdown() {
         
     } catch (error) {
         console.error('Error rendering markdown:', error);
-        alert('Failed to load the markdown file.');
     }
 }
-// 修改点 2: 使用事件委托处理点击
+
+// 事件委托
 document.addEventListener('click', async (e) => {
     if (e.target.classList.contains('btn-fullscreen')) {
-        const code = e.target.getAttribute('data-code');
+        const codeId = e.target.getAttribute('data-code-id');
+        const code = mermaidCodeStore.get(codeId);
         await viewInFullscreen(code);
     } else if (e.target.classList.contains('btn-export')) {
-        const code = e.target.getAttribute('data-code');
+        const codeId = e.target.getAttribute('data-code-id');
+        const code = mermaidCodeStore.get(codeId);
         await exportDiagram(code);
     }
 });
-// 修改点 3: 将函数改为普通的 async function 即可，不再强制绑定 window
+
 async function viewInFullscreen(mermaidCode) {
     try {
-        await renderMermaidInFullscreen(mermaidCode);
+        // 1. 立即显示对话框 (关键！先让元素进入 DOM 且可见，以便 Mermaid 计算尺寸)
         fullscreenDialog.showModal();
+
+        // 2. 彻底清空内容
+        fullscreenContent.innerHTML = ''; 
+        
+        // 3. 创建纯净的容器
+        const containerDiv = document.createElement('div');
+        containerDiv.className = 'fullscreen-diagram-container';
+        containerDiv.style.display = 'flex';
+        containerDiv.style.justifyContent = 'center';
+        containerDiv.style.alignItems = 'center';
+        containerDiv.style.width = '100%';
+        containerDiv.style.height = '100%';
+
+        const mermaidDiv = document.createElement('div');
+        mermaidDiv.id = 'fullscreen-mermaid';
+        mermaidDiv.className = 'mermaid';
+        // 确保是纯文本
+        mermaidDiv.textContent = mermaidCode;
+        
+        containerDiv.appendChild(mermaidDiv);
+        fullscreenContent.appendChild(containerDiv);
+        
+        // 4. 稍微延迟一点点，确保浏览器已经完成了 Dialog 的显示渲染
+        await new Promise(resolve => setTimeout(resolve, 50));
+
+        // 5. 执行渲染
+        await mermaid.run({
+            querySelector: '#fullscreen-mermaid'
+        });
+
+        console.log('Fullscreen render complete');
     } catch (error) {
-        console.error('Error rendering full screen diagram:', error);
+        console.error('Error rendering in fullscreen:', error);
     }
 }
 
 async function exportDiagram(mermaidCode) {
     try {
-        // 注意：@electron/remote 需要在主进程配置，这里先提供功能提示
         alert('Exporting diagram...\n\nFunctionality: Rendering to SVG and triggering system save dialog.');
         console.log('Exporting this code:', mermaidCode);
     } catch (error) {
@@ -131,72 +175,33 @@ async function exportDiagram(mermaidCode) {
     }
 }
 
-// Helper function to escape HTML in strings
 function escapeHtml(text) {
-    const map = {
-        '&': '&amp;',
-        '<': '&lt;',
-        '>': '&gt;',
-        '"': '&quot;',
-        "'": '&#039;'
-    };
+    const map = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' };
     return text.replace(/[&<>"']/g, function(m) { return map[m]; });
 }
 
-// Function to view mermaid diagram in fullscreen
-window.viewInFullscreen = async function(mermaidCode) {
-    try {
-        // Create a temporary container for the diagram
-        const tempDiv = document.createElement('div');
-        tempDiv.innerHTML = `<div class="mermaid">${mermaidCode}</div>`;
-        
-        // Render into fullscreen
-        await renderMermaidInFullscreen(mermaidCode);
-        
-        // Show dialog
-        fullscreenDialog.showModal();
-    } catch (error) {
-        console.error('Error rendering full screen diagram:', error);
-    }
-};
-
-// Function to export mermaid diagram as image
-window.exportDiagram = async function(mermaidCode) {
-    try {
-        const { save } = require('@electron/remote');
-        
-        // We'll create a temporary SVG from the mermaid code using a canvas approach
-        // For simplicity, this will render a static preview in a new window for now
-        
-        alert('Diagram export functionality would open an image saving dialog here.\n\nIn a full implementation, it would generate and save an image file.');
-        
-    } catch (error) {
-        console.error('Error exporting diagram:', error);
-    }
-};
-
-// Function to render mermaid in fullscreen
 async function renderMermaidInFullscreen(mermaidCode) {
     try {
-        // Clear previous content
+        // 1. 彻底清空容器
         fullscreenContent.innerHTML = '';
         
-        // Create a container for the full screen diagram
+        // 2. 创建容器
         const containerDiv = document.createElement('div');
-        containerDiv.style.width = '100%';
-        containerDiv.style.height = '100%';
         containerDiv.className = 'fullscreen-diagram-container';
+        containerDiv.style.width = '100%';
         
-        // Add mermaid div with proper styling
+        // 3. 创建 mermaid 元素
         const mermaidDiv = document.createElement('div');
         mermaidDiv.id = 'fullscreen-mermaid';
         mermaidDiv.className = 'mermaid';
+        // 关键点：保存原始代码在 data 属性中，用于 resize 重新渲染
+        mermaidDiv.setAttribute('data-original-code', mermaidCode);
         mermaidDiv.textContent = mermaidCode;
         
         containerDiv.appendChild(mermaidDiv);
         fullscreenContent.appendChild(containerDiv);
         
-        // Run mermaid rendering for the fullscreen view
+        // 4. 强制 Mermaid 重新渲染该元素
         await mermaid.run({
             querySelector: '#fullscreen-mermaid'
         });
@@ -207,7 +212,6 @@ async function renderMermaidInFullscreen(mermaidCode) {
 
 document.getElementById('btn-open').onclick = renderMarkdown;
 
-// Initialize Mermaid
 mermaid.initialize({ 
     startOnLoad: false, 
     theme: 'default',

@@ -249,23 +249,22 @@ input[type="range"] {
     background: rgba(0, 0, 0, 0.9);
 }
 
-/* Fullscreen Dialog - 修改这里 */
+/* 对话框本身 */
 .fullscreen-dialog {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    background: rgba(0, 0, 0, 0.9);
+    width: 95vw;
+    height: 95vh;
+    max-width: 95vw;
+    max-height: 95vh;
     border: none;
-    border-radius: 0;
+    border-radius: 8px;
+    background: var(--bg-color); /* 使用你的主题变量 */
+    color: var(--text-color);
     padding: 0;
-    /* 移除这里的 display: flex; */
+    margin: auto;
 }
 
-/* 只有当 dialog 被打开 (带有 open 属性) 时才显示为 flex 布局 */
 .fullscreen-dialog[open] {
-    display: flex;
+    display: flex; /* 仅在 open 时显示为 flex */
     flex-direction: column;
 }
 
@@ -285,12 +284,22 @@ input[type="range"] {
     z-index: 1001; /* Ensure close button is above everything */
 }
 
+/* 内部内容区域 */
 #fullscreen-content {
-    flex: 1;
+    width: 100%;
+    height: calc(100% - 60px); /* 减去顶部按钮的高度 */
     display: flex;
     justify-content: center;
     align-items: center;
+    overflow: auto; /* 如果图表太大可以滚动 */
     padding: 20px;
+    box-sizing: border-box;
+}
+/* 确保 Mermaid 生成的 SVG 能够自适应 */
+.fullscreen-diagram-container .mermaid svg {
+    max-width: 100% !important;
+    height: auto !important;
+    max-height: 100% !important;
 }
 
 /* Dark Theme */
