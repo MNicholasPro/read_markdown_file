@@ -336,13 +336,7 @@ input[type="range"] {
     margin: 0 !important;
 }
 
-/* 确保 SVG 能够正常响应缩放 */
-#fullscreen-content .mermaid svg {
-    max-width: none !important; /* 允许 SVG 超过 100% 宽度以支持放大 */
-    max-height: none !important; 
-    width: auto !important;
-    height: auto !important;
-}
+
 /* Ensure SVG behaves as a block for the library */
 .fullscreen-diagram-container .mermaid svg {
     display: block;
