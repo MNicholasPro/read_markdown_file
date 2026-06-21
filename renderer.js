@@ -54,7 +54,7 @@ function applyZoom() {
 
 closeFullscreenBtn.onclick = () => {
     fullscreenDialog.close();
-    currentScale = 1; // Reset zoom when closing
+    // currentScale = 1; // Reset zoom when closing
 };
 
 window.addEventListener('resize', () => {
@@ -150,17 +150,7 @@ async function renderMermaidInFullscreen(mermaidCode) {
          * --------------------------------------------- */
         const zoomControls = document.createElement('div');
         zoomControls.id = 'fullscreen-zoom-controls';
-        // 把按钮定位到右下角
-        zoomControls.style.position = 'absolute';
-        zoomControls.style.bottom = '10px';
-        zoomControls.style.right = '10px';
-        zoomControls.style.display = 'flex';
-        zoomControls.style.gap = '5px';
-        zoomControls.style.background = 'rgba(255,255,255,0.8)';
-        zoomControls.style.border = '1px solid #ccc';
-        zoomControls.style.padding = '5px';
-        zoomControls.style.borderRadius = '4px';
-        zoomControls.style.zIndex = '10';
+        zoomControls.style.cssText = 'position: absolute; bottom: 10px; right: 10px; display: flex; gap: 5px; background: rgba(255,255,255,0.8); border: 1px solid #ccc; padding: 5px; border-radius: 4px; z-index: 10;';
 
         zoomControls.innerHTML = `
             <button id="zoom-in">+</button>
@@ -169,18 +159,11 @@ async function renderMermaidInFullscreen(mermaidCode) {
         `;
 
         /* ---------------------------------------------
-         * 2️⃣ 绑定缩放事件
-         * --------------------------------------------- */
-        zoomControls.querySelector('#zoom-in').onclick = () => { currentScale += 0.2; applyZoom(); };
-        zoomControls.querySelector('#zoom-out').onclick = () => { currentScale = Math.max(0.2, currentScale - 0.2); applyZoom(); };
-        zoomControls.querySelector('#zoom-reset').onclick = () => { currentScale = 1; applyZoom(); };
-
-        /* ---------------------------------------------
-         * 3️⃣ 创建容器 & Mermaid 代码块
+         * 2️⃣ 创建容器 & Mermaid 代码块
          * --------------------------------------------- */
         const containerDiv = document.createElement('div');
         containerDiv.className = 'fullscreen-diagram-container';
-        containerDiv.style.cssText = 'width: 100%; height: 100%; display: flex; justify-content: center; align-items: center; overflow: auto; position: relative;'; // 需 relative 让按钮定位生效
+        containerDiv.style.cssText = 'width: 100%; height: 100%; display: flex; justify-content: center; align-items: center; overflow: hidden; position: relative;';
 
         const mermaidDiv = document.createElement('div');
         mermaidDiv.id = 'fullscreen-mermaid';
@@ -189,26 +172,46 @@ async function renderMermaidInFullscreen(mermaidCode) {
         mermaidDiv.textContent = mermaidCode;
 
         containerDiv.appendChild(mermaidDiv);
+        fullscreenContent.appendChild(containerDiv);
+        fullscreenContent.appendChild(zoomControls);
 
         /* ---------------------------------------------
-         * 4️⃣ 将按钮和容器添加到页面
-         * --------------------------------------------- */
-        fullscreenContent.appendChild(containerDiv);   // 先放容器
-        fullscreenContent.appendChild(zoomControls);   // 再放按钮，让其位于最上层
-
-        /* ---------------------------------------------
-         * 5️⃣ 渲染 Mermaid 并确保 SVG 可放大
+         * 3️⃣ 渲染 Mermaid 并初始化 Pan-Zoom
          * --------------------------------------------- */
         await new Promise(resolve => setTimeout(resolve, 50));
         await mermaid.run({ querySelector: '#fullscreen-mermaid' });
 
         const svg = document.querySelector('#fullscreen-mermaid svg');
         if (svg) {
+            // Ensure SVG fills the container for pan-zoom to work correctly
+            svg.style.width = '100%';
+            svg.style.height = '100%';
             svg.style.maxWidth = 'none';
             svg.style.maxHeight = 'none';
-        }
 
-        applyZoom();  // 默认 1 倍
+            // Initialize svg-pan-zoom
+            const panZoomInstance = svgPanZoom('#fullscreen-mermaid svg', {
+                zoomEnabled: true,
+                controlPanelsEnabled: true,
+                zoomScaleSensitivity: 0.3,
+                lowerZoomLimit: 0.1,
+                upperZoomLimit: 10,
+                minZoomLevel: 0.1,
+                maxZoomLevel: 10
+            });
+
+            // Bind the custom buttons to the pan-zoom instance
+            zoomControls.querySelector('#zoom-in').onclick = () => {
+                panZoomInstance.zoomIn();
+            };
+            zoomControls.querySelector('#zoom-out').onclick = () => {
+                panZoomInstance.zoomOut();
+            };
+            zoomControls.querySelector('#zoom-reset').onclick = () => {
+                panZoomInstance.resetZoom();
+                panZoomInstance.center();
+            };
+        }
     } catch (error) {
         console.error('Error rendering in fullscreen:', error);
     }
