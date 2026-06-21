@@ -216,18 +216,6 @@ input[type="range"] {
     border-radius: 8px;
 }
 
-/* Mermaid Diagram Styling */
-.mermaid {
-    background: white;
-    padding: 20px;
-    border-radius: 8px;
-    margin: 20px 0;
-    display: flex;
-    justify-content: center;
-    position: relative;
-    z-index: 1; /* Ensure diagrams are on top */
-}
-
 /* Mermaid Controls */
 .mermaid-controls {
     position: absolute;
@@ -392,30 +380,13 @@ input[type="range"] {
     z-index: 10; /* 确保在图表之上 */
 }
 
-.mermaid {
-    background: white;
-    padding: 20px;
-    border-radius: 8px;
-    display: flex;
-    justify-content: center;
-    /* 移除原有的 position: relative; */
-}
-
+/* Mermaid Diagram Styling */
 /* 确保全屏容器允许内容溢出并可滚动 */
 .mermaid {
+    background: white;
     overflow: auto !important;
     display: flex;
     justify-content: center;
     align-items: center;
     padding: 50px; /* 给缩放留出空间 */
-}
-
-.mermaid svg {
-    max-width: none !important; /* 覆盖默认的 100% 限制，否则无法放大 */
-    height: auto !important;
-}
-
-#zoom-controls button:hover {
-    background: #eee;
-    box-shadow: 0 0 5px rgba(0,0,0,0.2);
 }
