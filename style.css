@@ -332,10 +332,33 @@ input[type="range"] {
     height: calc(100% - 60px); /* 减去顶部按钮的高度 */
     display: flex;
     justify-content: center;
-    align-items: center;
-    overflow: auto; /* 如果图表太大可以滚动 */
+    align-items: flex-start;
+    overflow: auto;
     padding: 20px;
     box-sizing: border-box;
+    background-color: white; /* 将背景色移到这里，确保全屏白色 */
+}
+
+/* 调整 Mermaid 容器，允许其随缩放改变尺寸 */
+#fullscreen-content .mermaid {
+    width: auto !important; /* 允许缩放改变宽度 */
+    height: auto !important; /* 允许缩放改变高度 */
+    min-width: 100%;
+    min-height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: auto;
+    background: transparent; /* 背景由父级提供 */
+    border-radius: 0; 
+}
+
+/* 确保 SVG 能够正常响应缩放 */
+#fullscreen-content .mermaid svg {
+    max-width: none !important; /* 允许 SVG 超过 100% 宽度以支持放大 */
+    max-height: none !important; 
+    width: auto !important;
+    height: auto !important;
 }
 /* 确保 Mermaid 生成的 SVG 能够自适应 */
 .fullscreen-diagram-container .mermaid svg {

@@ -144,47 +144,71 @@ async function viewInFullscreen(mermaidCode) {
 async function renderMermaidInFullscreen(mermaidCode) {
     try {
         fullscreenContent.innerHTML = '';
-        
-        // Create Zoom Controls
+
+        /* ---------------------------------------------
+         * 1️⃣ 生成缩放控制按钮
+         * --------------------------------------------- */
         const zoomControls = document.createElement('div');
         zoomControls.id = 'fullscreen-zoom-controls';
+        // 把按钮定位到右下角
+        zoomControls.style.position = 'absolute';
+        zoomControls.style.bottom = '10px';
+        zoomControls.style.right = '10px';
+        zoomControls.style.display = 'flex';
+        zoomControls.style.gap = '5px';
+        zoomControls.style.background = 'rgba(255,255,255,0.8)';
+        zoomControls.style.border = '1px solid #ccc';
+        zoomControls.style.padding = '5px';
+        zoomControls.style.borderRadius = '4px';
+        zoomControls.style.zIndex = '10';
+
         zoomControls.innerHTML = `
             <button id="zoom-in">+</button>
             <button id="zoom-out">−</button>
             <button id="zoom-reset">Reset</button>
         `;
-        
-        // Bind Zoom Events
+
+        /* ---------------------------------------------
+         * 2️⃣ 绑定缩放事件
+         * --------------------------------------------- */
         zoomControls.querySelector('#zoom-in').onclick = () => { currentScale += 0.2; applyZoom(); };
         zoomControls.querySelector('#zoom-out').onclick = () => { currentScale = Math.max(0.2, currentScale - 0.2); applyZoom(); };
         zoomControls.querySelector('#zoom-reset').onclick = () => { currentScale = 1; applyZoom(); };
 
-        // Create Container for the diagram
+        /* ---------------------------------------------
+         * 3️⃣ 创建容器 & Mermaid 代码块
+         * --------------------------------------------- */
         const containerDiv = document.createElement('div');
         containerDiv.className = 'fullscreen-diagram-container';
-        containerDiv.style.cssText = 'width: 100%; height: 100%; display: flex; justify-content: center; align-items: center; overflow: auto;';
-        
+        containerDiv.style.cssText = 'width: 100%; height: 100%; display: flex; justify-content: center; align-items: center; overflow: auto; position: relative;'; // 需 relative 让按钮定位生效
+
         const mermaidDiv = document.createElement('div');
         mermaidDiv.id = 'fullscreen-mermaid';
         mermaidDiv.className = 'mermaid';
         mermaidDiv.setAttribute('data-original-code', mermaidCode);
         mermaidDiv.textContent = mermaidCode;
-        
+
         containerDiv.appendChild(mermaidDiv);
-        
-        fullscreenContent.appendChild(zoomControls);
-        fullscreenContent.appendChild(containerDiv);
-        
+
+        /* ---------------------------------------------
+         * 4️⃣ 将按钮和容器添加到页面
+         * --------------------------------------------- */
+        fullscreenContent.appendChild(containerDiv);   // 先放容器
+        fullscreenContent.appendChild(zoomControls);   // 再放按钮，让其位于最上层
+
+        /* ---------------------------------------------
+         * 5️⃣ 渲染 Mermaid 并确保 SVG 可放大
+         * --------------------------------------------- */
         await new Promise(resolve => setTimeout(resolve, 50));
         await mermaid.run({ querySelector: '#fullscreen-mermaid' });
-        
-        // Ensure the SVG inside is maximized
+
         const svg = document.querySelector('#fullscreen-mermaid svg');
         if (svg) {
             svg.style.maxWidth = 'none';
             svg.style.maxHeight = 'none';
         }
-        applyZoom();
+
+        applyZoom();  // 默认 1 倍
     } catch (error) {
         console.error('Error rendering in fullscreen:', error);
     }
