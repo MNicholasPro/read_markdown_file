@@ -5,25 +5,42 @@ document.getElementById('btn-minimize').onclick = () => ipcRenderer.send('window
 document.getElementById('btn-maximize').onclick = () => ipcRenderer.send('window-control', 'maximize');
 document.getElementById('btn-close').onclick = () => ipcRenderer.send('window-control', 'close');
 
-// Background Hue Control
-const hueSlider = document.getElementById('bg-hue');
-hueSlider.oninput = (e) => {
-    document.documentElement.style.setProperty('--primary-hue', e.target.value);
-};
-
-document.getElementById('btn-random-bg').onclick = () => {
-    const randomHue = Math.floor(Math.random() * 360);
-    hueSlider.value = randomHue;
-    document.documentElement.style.setProperty('--primary-hue', randomHue);
-};
-
 // Theme Toggle
 const themeToggleBtn = document.getElementById('btn-toggle-theme');
 themeToggleBtn.onclick = () => {
-    const currentTheme = document.body.getAttribute('data-theme');
-    const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+    const currentTheme = document.body.getAttribute('data-theme') || 'light';
+    let newTheme;
+
+    // Cycle through themes: light -> dark -> github-light -> github-dark -> light
+    if (currentTheme === 'light') {
+        newTheme = 'dark';
+    } else if (currentTheme === 'dark') {
+        newTheme = 'github-light';
+    } else if (currentTheme === 'github-light') {
+        newTheme = 'github-dark';
+    } else {
+        newTheme = 'light';
+    }
+
     document.body.setAttribute('data-theme', newTheme);
+    ipcRenderer.send('set-theme', newTheme);
 };
+
+// System theme detection
+ipcRenderer.invoke('get-system-theme').then((theme) => {
+    if (theme !== 'system') {
+        document.body.setAttribute('data-theme', theme);
+    } else {
+        // Listen for system theme changes
+        const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+        const handleSystemThemeChange = (e) => {
+            document.body.setAttribute('data-theme', e.matches ? 'dark' : 'light');
+        };
+        mediaQuery.addEventListener('change', handleSystemThemeChange);
+        // Set initial theme
+        handleSystemThemeChange(mediaQuery);
+    }
+});
 
 // Markdown Rendering Configuration
 marked.setOptions({

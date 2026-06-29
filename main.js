@@ -7,18 +7,31 @@ if (require('electron-squirrel-startup')) {
   app.quit();
 }
 
+let mainWindow;
+
 function createWindow() {
-  const win = new BrowserWindow({
+  mainWindow = new BrowserWindow({
     width: 1200,
     height: 800,
-    frame: false, // Frameless for a more  modern look
+    frame: false, // Frameless for a more modern look
     webPreferences: {
       nodeIntegration: true,
       contextIsolation: false,
     },
   });
 
-  win.loadFile('index.html');
+  mainWindow.loadFile('index.html');
+  
+  // Set up theme handling
+  ipcMain.handle('get-system-theme', () => {
+    const systemTheme = app.getSystemPreferences().isDarkMode() ? 'dark' : 'light';
+    return systemTheme;
+  });
+  
+  ipcMain.on('set-theme', (event, theme) => {
+    // Save user preference to settings if needed
+    console.log('Theme set to:', theme);
+  });
 }
 
 app.on('ready', () => {
