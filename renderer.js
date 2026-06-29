@@ -24,17 +24,18 @@ themeToggleBtn.onclick = () => {
 
 // System theme detection
 ipcRenderer.invoke('get-system-theme').then((theme) => {
-    if (theme !== 'system') {
-        document.body.setAttribute('data-theme', theme);
-    } else {
+    if (theme === 'system') {
         // Listen for system theme changes
         const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
         const handleSystemThemeChange = (e) => {
-            document.body.setAttribute('data-theme', e.matches ? 'dark' : 'light');
+            document.body.setAttribute('data-theme', e.matches ? 'github-dark' : 'github-light');
         };
         mediaQuery.addEventListener('change', handleSystemThemeChange);
-        // Set initial theme
+        // Set initial theme based on system preference
         handleSystemThemeChange(mediaQuery);
+    } else {
+        // Use the specific theme (either github-light or github-dark)
+        document.body.setAttribute('data-theme', theme);
     }
 });
 

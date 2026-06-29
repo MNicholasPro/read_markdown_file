@@ -21,13 +21,14 @@ function createWindow() {
   });
 
   mainWindow.loadFile('index.html');
-  
+
   // Set up theme handling
   ipcMain.handle('get-system-theme', () => {
-    const systemTheme = app.getSystemPreferences().isDarkMode() ? 'dark' : 'light';
+    const { nativeTheme } = require('electron');
+    const systemTheme = nativeTheme.shouldUseDarkColors ? 'github-dark' : 'github-light';
     return systemTheme;
   });
-  
+
   ipcMain.on('set-theme', (event, theme) => {
     // Save user preference to settings if needed
     console.log('Theme set to:', theme);
