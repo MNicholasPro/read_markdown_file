@@ -347,7 +347,35 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Set up event listeners for buttons
     document.getElementById('btn-open').onclick = renderMarkdown;
+
+    // Set up sidebar toggle button
+    const sidebarToggleBtn = document.getElementById('btn-toggle-sidebar');
+    if (sidebarToggleBtn) {
+        sidebarToggleBtn.onclick = toggleSidebar;
+    }
 });
+
+// Toggle sidebar visibility
+function toggleSidebar() {
+    const controlPanel = document.getElementById('control-panel');
+    const contentViewer = document.getElementById('content-viewer');
+
+    if (controlPanel) {
+        // Check current state
+        const isHidden = controlPanel.style.display === 'none';
+
+        if (isHidden) {
+            // Show sidebar
+            controlPanel.style.display = '';
+            controlPanel.style.width = '260px';
+            contentViewer.style.marginLeft = '280px';  // Adjust for sidebar width
+        } else {
+            // Hide sidebar
+            controlPanel.style.display = 'none';
+            contentViewer.style.marginLeft = '20px';   // Reset margin when hidden
+        }
+    }
+}
 
 mermaid.initialize({
     startOnLoad: false,
