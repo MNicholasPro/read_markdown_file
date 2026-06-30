@@ -328,8 +328,9 @@ input[type="range"] {
 }
 
 .markdown-body {
-    max-width: 900px;
-    margin: 0 auto;
+    width: 100%;
+    margin: 0;
+    padding: 0 20px; /* 添加左右内边距以保持良好视觉效果 */
     line-height: 1.6;
     font-size: 18px;
     color: var(--text-color);
