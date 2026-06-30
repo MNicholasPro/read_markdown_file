@@ -39,6 +39,90 @@ ipcRenderer.invoke('get-system-theme').then((theme) => {
     }
 });
 
+// History management - stores up to 10 recent files
+let fileHistory = JSON.parse(localStorage.getItem('fileHistory') || '[]');
+
+// Add a file to history
+function addToHistory(filePath, fileName) {
+    // Remove if already exists (to update position)
+    const existingIndex = fileHistory.findIndex(item => item.path === filePath);
+    if (existingIndex !== -1) {
+        fileHistory.splice(existingIndex, 1);
+    }
+
+    // Add to beginning of history
+    fileHistory.unshift({
+        path: filePath,
+        name: fileName,
+        timestamp: Date.now()
+    });
+
+    // Keep only last 10 items
+    if (fileHistory.length > 10) {
+        fileHistory = fileHistory.slice(0, 10);
+    }
+
+    // Save to localStorage
+    localStorage.setItem('fileHistory', JSON.stringify(fileHistory));
+
+    // Update history display
+    updateHistoryDisplay();
+}
+
+// Update the history display in UI
+function updateHistoryDisplay() {
+    const historyContainer = document.getElementById('history-list');
+    if (!historyContainer) return;
+
+    // Clear current list
+    historyContainer.innerHTML = '';
+
+    // Add each item to the list
+    fileHistory.forEach((item, index) => {
+        const listItem = document.createElement('li');
+        listItem.className = 'history-item';
+        listItem.setAttribute('data-path', item.path);
+        listItem.title = `${item.name}\n${item.path}`;
+
+        // Create a tooltip with full path for hover display
+        const fileNameSpan = document.createElement('span');
+        fileNameSpan.textContent = item.name;
+        fileNameSpan.classList.add('file-name-tooltip');
+        fileNameSpan.setAttribute('data-full-path', item.path);
+
+        // Add click handler to open file
+        listItem.onclick = () => {
+            openFileFromHistory(item.path);
+        };
+
+        listItem.appendChild(fileNameSpan);
+        historyContainer.appendChild(listItem);
+    });
+}
+
+// Open a file from the history list
+async function openFileFromHistory(filePath) {
+    try {
+        const rawContent = await ipcRenderer.invoke('read-file', filePath);
+        let htmlContent = marked.parse(rawContent);
+        const contentViewer = document.getElementById('markdown-body');
+        contentViewer.innerHTML = htmlContent;
+
+        // Add to history (this will update the display)
+        addToHistory(filePath, getFileNameFromPath(filePath));
+
+        // Render mermaid diagrams
+        await renderMermaidDiagrams();
+    } catch (error) {
+        console.error('Error opening file from history:', error);
+    }
+}
+
+// Helper function to extract filename from path
+function getFileNameFromPath(path) {
+    return path.split('/').pop() || path;
+}
+
 // Markdown Rendering Configuration
 marked.setOptions({
     highlight: function(code, lang) {
@@ -48,6 +132,42 @@ marked.setOptions({
     breaks: true,
     gfm: true
 });
+
+// Render mermaid diagrams in the content
+async function renderMermaidDiagrams() {
+    try {
+        const contentViewer = document.getElementById('markdown-body');
+        const mermaidBlocks = contentViewer.querySelectorAll('pre code.language-mermaid');
+
+        for (let block of mermaidBlocks) {
+            const pre = block.parentElement;
+            const mermaidCode = block.textContent;
+            const codeId = getCodeId(mermaidCode);
+
+            const wrapperDiv = document.createElement('div');
+            wrapperDiv.className = 'mermaid-wrapper';
+
+            const controlsDiv = document.createElement('div');
+            controlsDiv.className = 'mermaid-controls';
+            controlsDiv.innerHTML = `
+                <button class="mermaid-btn btn-fullscreen" data-code-id="${codeId}">🔍 Fullscreen</button>
+                <button class="mermaid-btn btn-export" data-code-id="${codeId}">💾 Export</button>
+            `;
+
+            const mermaidDiv = document.createElement('div');
+            mermaidDiv.className = 'mermaid';
+            mermaidDiv.textContent = mermaidCode;
+
+            wrapperDiv.appendChild(controlsDiv);
+            wrapperDiv.appendChild(mermaidDiv);
+            pre.replaceWith(wrapperDiv);
+        }
+
+        await mermaid.run();
+    } catch (error) {
+        console.error('Error rendering mermaid diagrams:', error);
+    }
+}
 
 // Fullscreen Dialog Elements
 const fullscreenDialog = document.getElementById('mermaid-fullscreen');
@@ -92,7 +212,7 @@ function getCodeId(code) {
 
 async function renderMarkdown() {
     const contentViewer = document.getElementById('markdown-body');
-    
+
     try {
         const filePath = await ipcRenderer.invoke('open-file');
         if (!filePath) return;
@@ -101,33 +221,11 @@ async function renderMarkdown() {
         let htmlContent = marked.parse(rawContent);
         contentViewer.innerHTML = htmlContent;
 
-        const mermaidBlocks = contentViewer.querySelectorAll('pre code.language-mermaid');
-        
-        for (let block of mermaidBlocks) {
-            const pre = block.parentElement;
-            const mermaidCode = block.textContent;
-            const codeId = getCodeId(mermaidCode);
-            
-            const wrapperDiv = document.createElement('div');
-            wrapperDiv.className = 'mermaid-wrapper';
-            
-            const controlsDiv = document.createElement('div');
-            controlsDiv.className = 'mermaid-controls';
-            controlsDiv.innerHTML = `
-                <button class="mermaid-btn btn-fullscreen" data-code-id="${codeId}">🔍 Fullscreen</button>
-                <button class="mermaid-btn btn-export" data-code-id="${codeId}">💾 Export</button>
-            `;
-            
-            const mermaidDiv = document.createElement('div');
-            mermaidDiv.className = 'mermaid';
-            mermaidDiv.textContent = mermaidCode;
-            
-            wrapperDiv.appendChild(controlsDiv);
-            wrapperDiv.appendChild(mermaidDiv);
-            pre.replaceWith(wrapperDiv);
-        }
+        // Add to history
+        addToHistory(filePath, getFileNameFromPath(filePath));
 
-        await mermaid.run();
+        // Render mermaid diagrams
+        await renderMermaidDiagrams();
     } catch (error) {
         console.error('Error rendering markdown:', error);
     }
@@ -242,8 +340,17 @@ async function exportDiagram(mermaidCode) {
 
 document.getElementById('btn-open').onclick = renderMarkdown;
 
-mermaid.initialize({ 
-    startOnLoad: false, 
+// Initialize the app when DOM is loaded
+document.addEventListener('DOMContentLoaded', () => {
+    // Load history from localStorage on startup
+    updateHistoryDisplay();
+
+    // Set up event listeners for buttons
+    document.getElementById('btn-open').onclick = renderMarkdown;
+});
+
+mermaid.initialize({
+    startOnLoad: false,
     theme: 'default',
-    securityLevel: 'loose' 
+    securityLevel: 'loose'
 });
