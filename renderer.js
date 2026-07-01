@@ -361,17 +361,16 @@ function toggleSidebar() {
     const contentViewer = document.getElementById('content-viewer');
 
     if (controlPanel) {
-        // Check current state
-        const isHidden = controlPanel.style.display === 'none';
+        // Check current state using a data attribute or CSS class for better reliability
+        const isHidden = controlPanel.classList.contains('hidden');
 
         if (isHidden) {
             // Show sidebar
-            controlPanel.style.display = '';
-            controlPanel.style.width = '260px';
+            controlPanel.classList.remove('hidden');
             contentViewer.style.marginLeft = '280px';  // Adjust for sidebar width
         } else {
             // Hide sidebar
-            controlPanel.style.display = 'none';
+            controlPanel.classList.add('hidden');
             contentViewer.style.marginLeft = '20px';   // Reset margin when hidden
         }
     }

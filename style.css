@@ -92,6 +92,12 @@ body {
     z-index: 100; /* Ensure title bar is on top */
 }
 
+.drag-region {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
 .app-title {
     font-size: 14px;
     font-weight: 600;
@@ -176,6 +182,16 @@ body {
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
     z-index: 10; /* Ensure control panel is above content */
     transition: all 0.3s ease;
+}
+
+/* Hidden sidebar state */
+#control-panel.hidden {
+    width: 0;
+    padding: 0;
+    margin: 0;
+    opacity: 0;
+    visibility: hidden;
+    overflow: hidden;
 }
 
 /* Content Area */
@@ -623,9 +639,54 @@ input[type="range"] {
 /* GitHub Light Theme - Mermaid Styles */
 [data-theme="github-light"] .mermaid {
     background: white;
+    color: #24292f; /* 使用深色文字 */
 }
 
 /* GitHub Dark Theme - Mermaid Styles */
 [data-theme="github-dark"] .mermaid {
     background: #0d1117;
+    color: #e6edf3; /* 使用浅色文字 */
+}
+
+/* Improve contrast for mermaid elements in dark theme */
+[data-theme="github-dark"] .mermaid rect,
+[data-theme="github-dark"] .mermaid path,
+[data-theme="github-dark"] .mermaid polygon,
+[data-theme="github-dark"] .mermaid circle {
+    stroke: #484f58 !important;
+}
+
+/* Improve text contrast in dark theme */
+[data-theme="github-dark"] .mermaid text {
+    fill: #e6edf3 !important; /* 更亮的白色文字 */
+}
+
+/* Improve contrast for mermaid text in dark theme */
+[data-theme="github-dark"] .mermaid text {
+    fill: #e6edf3 !important; /* 更亮的白色文字 */
+}
+
+/* GitHub Light Theme - Mermaid Styles */
+[data-theme="github-light"] .mermaid {
+    background: white;
+    color: #24292f; /* 使用深色文字 */
+}
+
+/* GitHub Dark Theme - Mermaid Styles */
+[data-theme="github-dark"] .mermaid {
+    background: #0d1117;
+    color: #e6edf3; /* 使用浅色文字 */
+}
+
+/* Improve contrast for mermaid elements in dark theme */
+[data-theme="github-dark"] .mermaid rect,
+[data-theme="github-dark"] .mermaid path,
+[data-theme="github-dark"] .mermaid polygon,
+[data-theme="github-dark"] .mermaid circle {
+    stroke: #484f58 !important;
+}
+
+/* Improve text contrast in dark theme */
+[data-theme="github-dark"] .mermaid text {
+    fill: #e6edf3 !important; /* 更亮的白色文字 */
 }
