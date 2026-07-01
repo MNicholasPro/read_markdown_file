@@ -345,34 +345,100 @@ document.addEventListener('DOMContentLoaded', () => {
     // Load history from localStorage on startup
     updateHistoryDisplay();
 
-    // Set up event listeners for buttons
-    document.getElementById('btn-open').onclick = renderMarkdown;
-
-    // Set up sidebar toggle button
-    const sidebarToggleBtn = document.getElementById('btn-toggle-sidebar');
-    if (sidebarToggleBtn) {
-        sidebarToggleBtn.onclick = toggleSidebar;
-    }
+    // Set up all event listeners
+    initEventListeners();
 });
 
-// Toggle sidebar visibility
-function toggleSidebar() {
+// Toggle sidebar visibility with enhanced debugging
+function toggleSidebar(event) {
+    console.log('toggleSidebar called', event);
+
     const controlPanel = document.getElementById('control-panel');
     const contentViewer = document.getElementById('content-viewer');
 
-    if (controlPanel) {
+    if (!controlPanel) {
+        console.error('Control panel not found!');
+        return;
+    }
+
+    try {
         // Check current state using a data attribute or CSS class for better reliability
         const isHidden = controlPanel.classList.contains('hidden');
+        console.log('Current sidebar state:', isHidden ? 'hidden' : 'visible');
 
         if (isHidden) {
             // Show sidebar
             controlPanel.classList.remove('hidden');
             contentViewer.style.marginLeft = '280px';  // Adjust for sidebar width
+            console.log('Sidebar shown successfully');
         } else {
             // Hide sidebar
             controlPanel.classList.add('hidden');
             contentViewer.style.marginLeft = '20px';   // Reset margin when hidden
+            console.log('Sidebar hidden successfully');
         }
+    } catch (error) {
+        console.error('Error toggling sidebar:', error);
+    }
+}
+
+// Initialize all event listeners with better error handling
+function initEventListeners() {
+    // Set up sidebar toggle button
+    const sidebarToggleBtn = document.getElementById('btn-toggle-sidebar');
+    if (sidebarToggleBtn) {
+        sidebarToggleBtn.addEventListener('click', toggleSidebar);
+        console.log('Sidebar toggle button initialized');
+    } else {
+        console.warn('Sidebar toggle button not found during init');
+
+        // Try to initialize after a short delay
+        setTimeout(() => {
+            const retryBtn = document.getElementById('btn-toggle-sidebar');
+            if (retryBtn) {
+                retryBtn.addEventListener('click', toggleSidebar);
+                console.log('Sidebar toggle button initialized with retry');
+            }
+        }, 1000);
+    }
+
+    // Set up other buttons
+    const openBtn = document.getElementById('btn-open');
+    if (openBtn) {
+        openBtn.addEventListener('click', renderMarkdown);
+    }
+
+    const minimizeBtn = document.getElementById('btn-minimize');
+    if (minimizeBtn) {
+        minimizeBtn.addEventListener('click', () => ipcRenderer.send('window-control', 'minimize'));
+    }
+
+    const maximizeBtn = document.getElementById('btn-maximize');
+    if (maximizeBtn) {
+        maximizeBtn.addEventListener('click', () => ipcRenderer.send('window-control', 'maximize'));
+    }
+
+    const closeBtn = document.getElementById('btn-close');
+    if (closeBtn) {
+        closeBtn.addEventListener('click', () => ipcRenderer.send('window-control', 'close'));
+    }
+
+    const themeToggleBtn = document.getElementById('btn-toggle-theme');
+    if (themeToggleBtn) {
+        themeToggleBtn.addEventListener('click', () => {
+            const currentTheme = document.body.getAttribute('data-theme') || 'github-light';
+            let newTheme;
+
+            // Cycle between GitHub light and dark themes only
+            if (currentTheme === 'github-light') {
+                newTheme = 'github-dark';
+            } else {
+                newTheme = 'github-light';
+            }
+
+            document.body.setAttribute('data-theme', newTheme);
+            ipcRenderer.send('set-theme', newTheme);
+        });
     }
 }
 
