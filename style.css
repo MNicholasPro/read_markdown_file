@@ -185,10 +185,14 @@ body {
     display: flex;
     flex: 1;
     padding: 20px;
-    gap: 20px;
     height: calc(100vh - 40px);
     position: relative; /* Ensure proper layering */
+    transition: all 0.3s ease;
+    gap: 0; /* Remove any default gaps between items */
+    margin: 0; /* Ensure no margins are applied */
+    padding: 0; /* Reset padding if needed to avoid spacing issues */
 }
+
 
 /* Control Panel (Glassmorphism) */
 #control-panel {
@@ -205,6 +209,7 @@ body {
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
     z-index: 10; /* Ensure control panel is above content */
     transition: all 0.3s ease;
+    flex-shrink: 0; /* Prevent the sidebar from shrinking */
 }
 
 /* Hidden sidebar state */
@@ -215,6 +220,8 @@ body {
     opacity: 0;
     visibility: hidden;
     overflow: hidden;
+    transition: all 0.3s ease;
+    flex-shrink: 0; /* Prevents the element from shrinking */
 }
 
 /* Content Area */
@@ -226,10 +233,10 @@ body {
     border: 1px solid var(--glass-border);
     border-radius: 16px;
     overflow-y: auto;
-    padding: 40px;
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
     z-index: 5; /* Ensure content area is above background */
     transition: margin-left 0.3s ease;
+    flex-shrink: 1; /* Allows the content viewer to shrink as needed */
 }
 
 .panel-section h3 {

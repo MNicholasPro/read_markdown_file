@@ -355,6 +355,7 @@ function toggleSidebar(event) {
 
     const controlPanel = document.getElementById('control-panel');
     const contentViewer = document.getElementById('content-viewer');
+    const mainContainer = document.getElementById('main-container');
 
     if (!controlPanel) {
         console.error('Control panel not found!');
@@ -369,12 +370,11 @@ function toggleSidebar(event) {
         if (isHidden) {
             // Show sidebar
             controlPanel.classList.remove('hidden');
-            contentViewer.style.marginLeft = '280px';  // Adjust for sidebar width
             console.log('Sidebar shown successfully');
         } else {
             // Hide sidebar
             controlPanel.classList.add('hidden');
-            contentViewer.style.marginLeft = '20px';   // Reset margin when hidden
+            contentViewer.style.marginLeft = '0px';   // Reset margin when hidden
             console.log('Sidebar hidden successfully');
         }
     } catch (error) {
