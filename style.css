@@ -441,6 +441,7 @@ input[type="range"] {
     border-collapse: collapse;
     width: 100%;
     margin: 16px 0;
+    border: 1px solid #d1d5da;
 }
 
 [data-theme="github-light"] .markdown-body th,
@@ -453,6 +454,10 @@ input[type="range"] {
 [data-theme="github-light"] .markdown-body th {
     background-color: #f6f8fa;
     font-weight: 600;
+}
+
+[data-theme="github-light"] .markdown-body table tbody tr:nth-child(even) {
+    background-color: #f7f7f7;
 }
 
 /* GitHub Dark Theme - Markdown Styles */
@@ -472,6 +477,7 @@ input[type="range"] {
     border-collapse: collapse;
     width: 100%;
     margin: 16px 0;
+    border: 1px solid #30363d;
 }
 
 [data-theme="github-dark"] .markdown-body th,
@@ -484,6 +490,10 @@ input[type="range"] {
 [data-theme="github-dark"] .markdown-body th {
     background-color: #161b22;
     font-weight: 600;
+}
+
+[data-theme="github-dark"] .markdown-body table tbody tr:nth-child(even) {
+    background-color: #161b22;
 }
 
 .markdown-body img {
