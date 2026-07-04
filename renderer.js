@@ -7,20 +7,6 @@ document.getElementById('btn-close').onclick = () => ipcRenderer.send('window-co
 
 // Theme Toggle
 const themeToggleBtn = document.getElementById('btn-toggle-theme');
-themeToggleBtn.onclick = () => {
-    const currentTheme = document.body.getAttribute('data-theme') || 'github-light';
-    let newTheme;
-
-    // Cycle between GitHub light and dark themes only
-    if (currentTheme === 'github-light') {
-        newTheme = 'github-dark';
-    } else {
-        newTheme = 'github-light';
-    }
-
-    document.body.setAttribute('data-theme', newTheme);
-    ipcRenderer.send('set-theme', newTheme);
-};
 
 // System theme detection
 ipcRenderer.invoke('get-system-theme').then((theme) => {
