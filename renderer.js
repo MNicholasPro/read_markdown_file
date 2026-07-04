@@ -74,7 +74,7 @@ function updateHistoryDisplay() {
         const fileNameSpan = document.createElement('span');
         fileNameSpan.textContent = item.name;
         fileNameSpan.classList.add('file-name-tooltip');
-        fileNameSpan.setAttribute('data-full-path', item.path);
+        fileNameSpan.setAttribute('data-full-path', `${item.name}\n${item.path}`);
 
         // Add click handler to open file
         listItem.onclick = () => {

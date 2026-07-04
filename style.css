@@ -261,7 +261,6 @@ body {
     cursor: pointer;
     transition: all 0.2s ease;
     position: relative;
-    overflow: hidden;
     white-space: nowrap;
     text-overflow: ellipsis;
     font-size: 12px;
@@ -288,19 +287,21 @@ body {
     bottom: 100%;
     left: 50%;
     transform: translateX(-50%);
-    background: rgba(0, 0, 0, 0.8);
+    background: rgba(0, 0, 0, 0.85);
     color: white;
-    padding: 4px 8px;
-    border-radius: 4px;
+    padding: 6px 10px;
+    border-radius: 6px;
     font-size: 12px;
-    white-space: nowrap;
+    white-space: pre-wrap;
     z-index: 1000;
     opacity: 0;
     visibility: hidden;
-    transition: opacity 0.3s, visibility 0.3s;
-    max-width: 300px;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    transition: opacity 0.2s ease, visibility 0.2s ease;
+    max-width: 400px;
+    width: max-content;
+    line-height: 1.4;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    text-align: center;
 }
 
 .history-item:hover .file-name-tooltip::before {
