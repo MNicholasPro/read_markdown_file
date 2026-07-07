@@ -224,8 +224,18 @@ document.addEventListener('click', async (e) => {
         await viewInFullscreen(code);
     } else if (e.target.classList.contains('btn-export')) {
         const codeId = e.target.getAttribute('data-code-id');
-        const code = mermaidCodeStore.get(codeId);
-        await exportDiagram(code);
+        // Find the specific mermaid div associated with this button
+        const wrapper = e.target.closest('.mermaid-wrapper');
+        const element = wrapper ? wrapper.querySelector('.mermaid') : null;
+        
+        if (element) {
+            const timestamp = new Date().getTime();
+            const fileName = `diagram_${timestamp}`;
+            // Default to PNG for the quick export button
+            await exportDiagram('png', element, fileName);
+        } else {
+            alert("Could not find the diagram to export.");
+        }
     }
 });
 
@@ -315,14 +325,84 @@ async function renderMermaidInFullscreen(mermaidCode) {
     }
 }
 
-async function exportDiagram(mermaidCode) {
+/**
+ * 导出函数：支持 SVG (原生), PNG, JPG
+ * @param {string} format - 'svg', 'png', or 'jpg'
+ * @param {HTMLElement} element - 要导出的 DOM 元素
+ * @param {string} filename - 文件名
+ */
+async function exportDiagram(format, element, filename) {
+    // --- 新增：检查 element 是否有效 ---
+    if (!element) {
+        console.error("Export Error: No element provided to exportDiagram.");
+        alert("错误：未找到要导出的图表内容。");
+        return;
+    }
     try {
-        alert('Exporting diagram...\n\nFunctionality: Rendering to SVG and triggering system save dialog.');
-        console.log('Exporting this code:', mermaidCode);
+        if (format === 'svg') {
+            // SVG 导出最简单，直接获取 SVG 节点的 XML
+            const svgElement = element.querySelector('svg');
+            if (!svgElement) throw new Error("No SVG element found");
+            
+            const svgData = new XMLSerializer().serializeToString(svgElement);
+            const svgBlob = new Blob([svgData], { type: 'image/svg+xml;charset=utf-8' });
+            const url = URL.createObjectURL(svgBlob);
+            
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `${filename}.svg`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+            
+        } else if (format === 'png' || format === 'jpg') {
+            // PNG/JPG 导出需要使用 html2canvas 来捕捉渲染后的像素
+            // scale: 2 实现了 2x 分辨率（Retina 级别清晰度）
+            const canvas = await html2canvas(element, {
+                scale: 2, 
+                useCORS: true,
+                backgroundColor: format === 'png' ? null : '#ffffff',
+                logging: false
+            });
+
+            const mimeType = format === 'png' ? 'image/png' : 'image/jpeg';
+            const dataUrl = canvas.toDataURL(mimeType, 0.9); // 0.9 是 jpg 的质量
+            
+            const link = document.createElement('a');
+            link.href = dataUrl;
+            link.download = `${filename}.${format}`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
     } catch (error) {
-        console.error('Error exporting diagram:', error);
+        console.error('Export failed:', error);
+        alert(`导出 ${format.toUpperCase()} 失败: ${error.message}`);
     }
 }
+
+/**
+ * 绑定到 UI 按钮的调用函数
+ * 假设你的 HTML 按钮长这样: <button onclick="handleExport('png')">导出 PNG</button>
+ */
+window.handleExport = async function(format) {
+    // 寻找页面中所有的 mermaid 容器 (通常是 .mermaid 或含有 svg 的 div)
+    const diagrams = document.querySelectorAll('.mermaid, .mermaid svg, [data-processed="true"]');
+    
+    if (diagrams.length === 0) {
+        alert("未检测到可导出的图表");
+        return;
+    }
+
+    // 默认导出第一个找到的图表，或者你可以遍历所有
+    // 这里演示导出第一个
+    const target = diagrams[0];
+    const timestamp = new Date().getTime();
+    const fileName = `diagram_${timestamp}`;
+
+    await exportDiagram(format, target, fileName);
+};
 
 document.getElementById('btn-open').onclick = renderMarkdown;
 
