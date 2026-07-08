@@ -137,7 +137,12 @@ async function renderMermaidDiagrams() {
             controlsDiv.className = 'mermaid-controls';
             controlsDiv.innerHTML = `
                 <button class="mermaid-btn btn-fullscreen" data-code-id="${codeId}">🔍 Fullscreen</button>
-                <button class="mermaid-btn btn-export" data-code-id="${codeId}">💾 Export</button>
+                <select class="mermaid-btn btn-export" data-code-id="${codeId}">
+                    <option value="" disabled selected>💾 Export</option>
+                    <option value="png">PNG</option>
+                    <option value="jpg">JPG</option>
+                    <option value="svg">SVG</option>
+                </select>
             `;
 
             const mermaidDiv = document.createElement('div');
@@ -222,17 +227,24 @@ document.addEventListener('click', async (e) => {
         const codeId = e.target.getAttribute('data-code-id');
         const code = mermaidCodeStore.get(codeId);
         await viewInFullscreen(code);
-    } else if (e.target.classList.contains('btn-export')) {
+    }
+});
+
+document.addEventListener('change', async (e) => {
+    if (e.target.classList.contains('btn-export')) {
+        const format = e.target.value;
+        if (!format) return;
         const codeId = e.target.getAttribute('data-code-id');
         // Find the specific mermaid div associated with this button
         const wrapper = e.target.closest('.mermaid-wrapper');
         const element = wrapper ? wrapper.querySelector('.mermaid') : null;
-        
+
         if (element) {
             const timestamp = new Date().getTime();
             const fileName = `diagram_${timestamp}`;
-            // Default to PNG for the quick export button
-            await exportDiagram('png', element, fileName);
+            await exportDiagram(format, element, fileName);
+            // Reset select to default
+            e.target.value = "";
         } else {
             alert("Could not find the diagram to export.");
         }
