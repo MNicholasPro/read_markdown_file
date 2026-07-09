@@ -8,6 +8,32 @@ document.getElementById('btn-close').onclick = () => ipcRenderer.send('window-co
 // Theme Toggle
 const themeToggleBtn = document.getElementById('btn-toggle-theme');
 
+// Font Size Management
+const fontSizeSlider = document.getElementById('font-size-slider');
+const fontSizeValue = document.getElementById('font-size-value');
+const markdownBody = document.getElementById('markdown-body');
+
+function updateFontSize(size, save = true) {
+    const fontSizePx = `${size}px`;
+    markdownBody.style.fontSize = fontSizePx;
+    if (fontSizeValue) {
+        fontSizeValue.textContent = fontSizePx;
+    }
+    if (save) {
+        localStorage.setItem('fontSize', size);
+    }
+}
+
+// Initialize font size
+const savedFontSize = localStorage.getItem('fontSize') || '18';
+updateFontSize(savedFontSize, false);
+if (fontSizeSlider) {
+    fontSizeSlider.value = savedFontSize;
+    fontSizeSlider.oninput = (e) => {
+        updateFontSize(e.target.value);
+    };
+}
+
 // System theme detection
 ipcRenderer.invoke('get-system-theme').then((theme) => {
     if (theme === 'system') {
@@ -86,6 +112,32 @@ function updateHistoryDisplay() {
     });
 }
 
+// Update the Table of Contents based on the rendered markdown headings
+function updateTOC() {
+    const tocList = document.getElementById('toc-list');
+    const contentViewer = document.getElementById('markdown-body');
+    if (!tocList || !contentViewer) return;
+
+    tocList.innerHTML = '';
+
+    const headings = contentViewer.querySelectorAll('h1, h2, h3');
+    headings.forEach((heading, index) => {
+        // Ensure heading has an ID for scrolling
+        if (!heading.id) {
+            heading.id = `heading-${index}`;
+        }
+
+        const li = document.createElement('li');
+        li.className = `toc-item depth-${heading.tagName.substring(1)}`;
+        li.textContent = heading.textContent;
+        li.onclick = () => {
+            heading.scrollIntoView({ behavior: 'smooth' });
+        };
+
+        tocList.appendChild(li);
+    });
+}
+
 // Open a file from the history list
 async function openFileFromHistory(filePath) {
     try {
@@ -93,6 +145,9 @@ async function openFileFromHistory(filePath) {
         let htmlContent = marked.parse(rawContent);
         const contentViewer = document.getElementById('markdown-body');
         contentViewer.innerHTML = htmlContent;
+
+        // Update Table of Contents
+        updateTOC();
 
         // Add to history (this will update the display)
         addToHistory(filePath, getFileNameFromPath(filePath));
@@ -211,6 +266,9 @@ async function renderMarkdown() {
         const rawContent = await ipcRenderer.invoke('read-file', filePath);
         let htmlContent = marked.parse(rawContent);
         contentViewer.innerHTML = htmlContent;
+
+        // Update Table of Contents
+        updateTOC();
 
         // Add to history
         addToHistory(filePath, getFileNameFromPath(filePath));
