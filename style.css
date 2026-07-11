@@ -929,7 +929,7 @@ input[type="range"] {
     cursor: pointer;
 }
 
-.btn-collect {
+.btn-collect, .btn-remove {
     background: rgba(255, 255, 255, 0.1);
     border: 1px solid var(--glass-border);
     color: var(--text-color);
@@ -941,7 +941,37 @@ input[type="range"] {
     opacity: 0.6;
 }
 
-.btn-collect:hover {
+.btn-collect:hover, .btn-remove:hover {
     opacity: 1;
     background: rgba(255, 255, 255, 0.2);
 }
+
+.btn-remove:hover {
+    background: rgba(255, 80, 80, 0.3);
+    color: #ff6b6b;
+}
+
+/* Collection Tab Delete Button */
+.collection-tab {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.btn-delete-tab {
+    background: transparent;
+    border: none;
+    color: var(--text-color);
+    font-size: 14px;
+    cursor: pointer;
+    opacity: 0.5;
+    transition: all 0.2s ease;
+    line-height: 1;
+    padding: 0 2px;
+}
+
+.btn-delete-tab:hover {
+    opacity: 1;
+    color: #ff6b6b;
+}
+

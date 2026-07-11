@@ -60,6 +60,29 @@ function saveCollections() {
     localStorage.setItem('fileCollections', JSON.stringify(collections));
 }
 
+function removeFromCollection(collectionId, filePath) {
+    const collection = collections.find(c => c.id === collectionId);
+    if (!collection) return;
+
+    collection.files = collection.files.filter(f => f.path !== filePath);
+    saveCollections();
+    if (activeView === collectionId) {
+        updateHistoryDisplay();
+    }
+}
+
+function deleteCollection(collectionId) {
+    if (!confirm('Are you sure you want to delete this collection?')) return;
+
+    collections = collections.filter(c => c.id !== collectionId);
+    if (activeView === collectionId) {
+        activeView = 'history';
+    }
+    saveCollections();
+    updateCollectionTabs();
+    updateHistoryDisplay();
+}
+
 // Add a file to history
 function addToHistory(filePath, fileName) {
     // Remove if already exists (to update position)
@@ -137,6 +160,15 @@ function renderDocumentList(items, isHistoryView) {
                 showSelectCollectionDialog(item);
             };
             container.appendChild(collectBtn);
+        } else {
+            const removeBtn = document.createElement('button');
+            removeBtn.className = 'btn-remove';
+            removeBtn.textContent = 'Remove';
+            removeBtn.onclick = (e) => {
+                e.stopPropagation();
+                removeFromCollection(activeView, item.path);
+            };
+            container.appendChild(removeBtn);
         }
 
         listItem.appendChild(container);
@@ -154,12 +186,26 @@ function updateCollectionTabs() {
     collections.forEach(collection => {
         const tab = document.createElement('div');
         tab.className = `collection-tab ${activeView === collection.id ? 'active' : ''}`;
-        tab.textContent = collection.name;
-        tab.onclick = () => {
+
+        const tabContent = document.createElement('span');
+        tabContent.textContent = collection.name;
+        tabContent.onclick = () => {
             activeView = collection.id;
             updateCollectionTabs();
             updateHistoryDisplay();
         };
+
+        const deleteBtn = document.createElement('button');
+        deleteBtn.className = 'btn-delete-tab';
+        deleteBtn.textContent = '×';
+        deleteBtn.title = 'Delete Collection';
+        deleteBtn.onclick = (e) => {
+            e.stopPropagation();
+            deleteCollection(collection.id);
+        };
+
+        tab.appendChild(tabContent);
+        tab.appendChild(deleteBtn);
         tabsContainer.appendChild(tab);
     });
 }
