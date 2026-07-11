@@ -53,6 +53,12 @@ ipcRenderer.invoke('get-system-theme').then((theme) => {
 
 // History management - stores up to 10 recent files
 let fileHistory = JSON.parse(localStorage.getItem('fileHistory') || '[]');
+let collections = JSON.parse(localStorage.getItem('fileCollections') || '[]');
+let activeView = 'history'; // 'history' or collectionId
+
+function saveCollections() {
+    localStorage.setItem('fileCollections', JSON.stringify(collections));
+}
 
 // Add a file to history
 function addToHistory(filePath, fileName) {
@@ -83,6 +89,15 @@ function addToHistory(filePath, fileName) {
 
 // Update the history display in UI
 function updateHistoryDisplay() {
+    const itemsToRender = activeView === 'history'
+        ? fileHistory
+        : collections.find(c => c.id === activeView)?.files || [];
+
+    renderDocumentList(itemsToRender, activeView === 'history');
+}
+
+// Generic function to render a list of documents
+function renderDocumentList(items, isHistoryView) {
     const historyContainer = document.getElementById('history-list');
     if (!historyContainer) return;
 
@@ -90,27 +105,72 @@ function updateHistoryDisplay() {
     historyContainer.innerHTML = '';
 
     // Add each item to the list
-    fileHistory.forEach((item, index) => {
+    items.forEach((item) => {
         const listItem = document.createElement('li');
         listItem.className = 'history-item';
-        listItem.setAttribute('data-path', item.path);
-        listItem.title = `${item.name}\n${item.path}`;
 
-        // Create a tooltip with full path for hover display
+        const container = document.createElement('div');
+        container.className = 'history-item-container';
+
+        const content = document.createElement('div');
+        content.className = 'history-item-content';
+
         const fileNameSpan = document.createElement('span');
         fileNameSpan.textContent = item.name;
         fileNameSpan.classList.add('file-name-tooltip');
         fileNameSpan.setAttribute('data-full-path', `${item.name}\n${item.path}`);
 
-        // Add click handler to open file
-        listItem.onclick = () => {
+        content.appendChild(fileNameSpan);
+
+        content.onclick = () => {
             openFileFromHistory(item.path);
         };
 
-        listItem.appendChild(fileNameSpan);
+        container.appendChild(content);
+
+        if (isHistoryView) {
+            const collectBtn = document.createElement('button');
+            collectBtn.className = 'btn-collect';
+            collectBtn.textContent = 'Collect';
+            collectBtn.onclick = (e) => {
+                e.stopPropagation();
+                showSelectCollectionDialog(item);
+            };
+            container.appendChild(collectBtn);
+        }
+
+        listItem.appendChild(container);
         historyContainer.appendChild(listItem);
     });
 }
+
+// Update the collection tabs in UI
+function updateCollectionTabs() {
+    const tabsContainer = document.getElementById('collection-tabs');
+    if (!tabsContainer) return;
+
+    tabsContainer.innerHTML = '';
+
+    collections.forEach(collection => {
+        const tab = document.createElement('div');
+        tab.className = `collection-tab ${activeView === collection.id ? 'active' : ''}`;
+        tab.textContent = collection.name;
+        tab.onclick = () => {
+            activeView = collection.id;
+            updateCollectionTabs();
+            updateHistoryDisplay();
+        };
+        tabsContainer.appendChild(tab);
+    });
+}
+
+// Handle switching back to History view
+function switchToHistoryView() {
+    activeView = 'history';
+    updateCollectionTabs();
+    updateHistoryDisplay();
+}
+
 
 // Update the Table of Contents based on the rendered markdown headings
 function updateTOC() {

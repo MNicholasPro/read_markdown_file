@@ -41,7 +41,11 @@
                     </div>
                 </div>
                 <div class="panel-section">
-                    <h3>History</h3>
+                    <div id="history-header" class="history-header">
+                        <button id="btn-add-collection" class="icon-btn" title="Add Collection">+</button>
+                        <h3 id="btn-view-history">History</h3>
+                        <div id="collection-tabs" class="collection-tabs"></div>
+                    </div>
                     <ul id="history-list" class="history-list"></ul>
                 </div>
                 <div class="panel-section">
@@ -74,13 +78,36 @@
         </dialog>
     </div>
 
-    <!-- Libraries -->
-    <script src="https://cdn.jsdelivr.net/npm/svg-pan-zoom@3.6.1/dist/svg-pan-zoom.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
-    <script src="renderer.js"></script>
-    <!-- 在 index.html 的 </body> 之前添加 -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-</body>
-</html> 
+        <!-- New Collection Name Dialog -->
+        <dialog id="dialog-new-collection" class="custom-dialog">
+            <div class="dialog-content">
+                <h4>New Collection</h4>
+                <input type="text" id="input-collection-name" placeholder="Enter collection name...">
+                <div class="dialog-actions">
+                    <button id="btn-cancel-collection" class="secondary-btn">Cancel</button>
+                    <button id="btn-save-collection" class="primary-btn">Save</button>
+                </div>
+            </div>
+        </dialog>
+
+        <!-- Select Collection Dialog -->
+        <dialog id="dialog-select-collection" class="custom-dialog">
+            <div class="dialog-content">
+                <h4>Add to Collection</h4>
+                <div id="collection-select-list" class="collection-select-list"></div>
+                <div class="dialog-actions">
+                    <button id="btn-cancel-select" class="secondary-btn">Cancel</button>
+                </div>
+            </div>
+        </dialog>
+
+        <!-- Libraries -->
+        <script src="https://cdn.jsdelivr.net/npm/svg-pan-zoom@3.6.1/dist/svg-pan-zoom.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+        <script src="renderer.js"></script>
+        <!-- 在 index.html 的 </body> 之前添加 -->
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    </body>
+    </html> 
