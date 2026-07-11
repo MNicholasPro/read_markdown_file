@@ -171,6 +171,71 @@ function switchToHistoryView() {
     updateHistoryDisplay();
 }
 
+// --- Collection Management Logic ---
+
+function showNewCollectionDialog() {
+    const dialog = document.getElementById('dialog-new-collection');
+    const input = document.getElementById('input-collection-name');
+    if (dialog && input) {
+        input.value = '';
+        dialog.showModal();
+    }
+}
+
+function saveNewCollection() {
+    const input = document.getElementById('input-collection-name');
+    const name = input.value.trim();
+    if (name) {
+        const newCollection = {
+            id: 'coll_' + Date.now(),
+            name: name,
+            files: []
+        };
+        collections.push(newCollection);
+        saveCollections();
+        updateCollectionTabs();
+        document.getElementById('dialog-new-collection').close();
+    }
+}
+
+function showSelectCollectionDialog(item) {
+    const dialog = document.getElementById('dialog-select-collection');
+    const listContainer = document.getElementById('collection-select-list');
+    if (!dialog || !listContainer) return;
+
+    listContainer.innerHTML = '';
+    if (collections.length === 0) {
+        listContainer.innerHTML = '<p class="empty-msg">No collections available. Please create one first.</p>';
+    } else {
+        collections.forEach(collection => {
+            const itemDiv = document.createElement('div');
+            itemDiv.className = 'collection-select-item';
+            itemDiv.textContent = collection.name;
+            itemDiv.onclick = () => {
+                addToCollection(item, collection.id);
+                dialog.close();
+            };
+            listContainer.appendChild(itemDiv);
+        });
+    }
+    dialog.showModal();
+}
+
+function addToCollection(item, collectionId) {
+    const collection = collections.find(c => c.id === collectionId);
+    if (!collection) return;
+
+    const existingIndex = collection.files.findIndex(f => f.path === item.path);
+    if (existingIndex === -1) {
+        collection.files.push(item);
+        saveCollections();
+        // If we are currently viewing this collection, refresh the list
+        if (activeView === collectionId) {
+            updateHistoryDisplay();
+        }
+    }
+}
+
 
 // Update the Table of Contents based on the rendered markdown headings
 function updateTOC() {
@@ -634,6 +699,31 @@ function initEventListeners() {
 
             document.body.setAttribute('data-theme', newTheme);
             ipcRenderer.send('set-theme', newTheme);
+        });
+    }
+
+    // Collection event listeners
+    const addCollectionBtn = document.getElementById('btn-add-collection');
+    if (addCollectionBtn) {
+        addCollectionBtn.addEventListener('click', showNewCollectionDialog);
+    }
+
+    const saveCollectionBtn = document.getElementById('btn-save-collection');
+    if (saveCollectionBtn) {
+        saveCollectionBtn.addEventListener('click', saveNewCollection);
+    }
+
+    const cancelCollectionBtn = document.getElementById('btn-cancel-collection');
+    if (cancelCollectionBtn) {
+        cancelCollectionBtn.addEventListener('click', () => {
+            document.getElementById('dialog-new-collection').close();
+        });
+    }
+
+    const cancelSelectBtn = document.getElementById('btn-cancel-select');
+    if (cancelSelectBtn) {
+        cancelSelectBtn.addEventListener('click', () => {
+            document.getElementById('dialog-select-collection').close();
         });
     }
 }
