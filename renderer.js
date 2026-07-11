@@ -702,6 +702,12 @@ function initEventListeners() {
         });
     }
 
+    // History view toggle
+    const viewHistoryBtn = document.getElementById('btn-view-history');
+    if (viewHistoryBtn) {
+        viewHistoryBtn.addEventListener('click', switchToHistoryView);
+    }
+
     // Collection event listeners
     const addCollectionBtn = document.getElementById('btn-add-collection');
     if (addCollectionBtn) {
