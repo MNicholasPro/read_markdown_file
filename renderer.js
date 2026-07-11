@@ -603,8 +603,9 @@ document.getElementById('btn-open').onclick = renderMarkdown;
 
 // Initialize the app when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
-    // Load history from localStorage on startup
+    // Load history and collections from localStorage on startup
     updateHistoryDisplay();
+    updateCollectionTabs();
 
     // Set up all event listeners
     initEventListeners();
