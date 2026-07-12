@@ -560,6 +560,13 @@ input[type="range"] {
     border-radius: 8px;
 }
 
+/* Mermaid Wrapper */
+.mermaid-wrapper {
+    position: relative;
+    width: 100%;
+    margin-bottom: 16px;
+}
+
 /* Mermaid Controls */
 .mermaid-controls {
     position: absolute;
