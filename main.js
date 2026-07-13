@@ -52,7 +52,7 @@ app.on('window-all-closed', () => {
 });
 
 ipcMain.on('window-control', (event, action) => {
-  const win = BrowserWindow.getFocusedWindow();
+  const win = BrowserWindow.fromWebContents(event.sender);
   if (!win) return;
 
   switch (action) {

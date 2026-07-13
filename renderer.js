@@ -1,10 +1,5 @@
 const { ipcRenderer } = require('electron');
 
-// Window Controls
-document.getElementById('btn-minimize').onclick = () => ipcRenderer.send('window-control', 'minimize');
-document.getElementById('btn-maximize').onclick = () => ipcRenderer.send('window-control', 'maximize');
-document.getElementById('btn-close').onclick = () => ipcRenderer.send('window-control', 'close');
-
 // Theme Toggle
 const themeToggleBtn = document.getElementById('btn-toggle-theme');
 
