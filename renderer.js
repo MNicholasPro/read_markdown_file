@@ -779,6 +779,38 @@ function initEventListeners() {
             document.getElementById('dialog-select-collection').close();
         });
     }
+
+    // Search listeners
+    const searchInput = document.getElementById('search-input');
+    if (searchInput) {
+        searchInput.addEventListener('input', (e) => {
+            performSearch(e.target.value);
+        });
+
+        searchInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                goToNextMatch();
+            } else if (e.key === 'Enter' && e.shiftKey) {
+                e.preventDefault();
+                goToPrevMatch();
+            } else if (e.key === 'Escape') {
+                clearSearch();
+                searchInput.value = '';
+                searchInput.blur();
+            }
+        });
+    }
+
+    const nextBtn = document.getElementById('btn-search-next');
+    if (nextBtn) {
+        nextBtn.addEventListener('click', goToNextMatch);
+    }
+
+    const prevBtn = document.getElementById('btn-search-prev');
+    if (prevBtn) {
+        prevBtn.addEventListener('click', goToPrevMatch);
+    }
 }
 
 mermaid.initialize({
@@ -786,3 +818,123 @@ mermaid.initialize({
     theme: 'default',
     securityLevel: 'loose'
 });
+
+// --- Search Functionality ---
+let searchMatches = [];
+let currentMatchIndex = -1;
+
+function removeAllHighlights() {
+    const contentViewer = document.getElementById('markdown-body');
+    const highlights = contentViewer.querySelectorAll('.search-highlight');
+    highlights.forEach(span => {
+        span.replaceWith(document.createTextNode(span.textContent));
+    });
+
+    // Re-merge text nodes
+    const walker = document.createTreeWalker(contentViewer, NodeFilter.SHOW_TEXT, null, false);
+    let nodes = [];
+    let node;
+    while(node = walker.nextNode()) nodes.push(node);
+
+    for(let i=0; i < nodes.length - 1; i++) {
+        if(nodes[i].parentNode === nodes[i+1].parentNode) {
+            nodes[i].textContent += nodes[i+1].textContent;
+            nodes[i].parentNode.removeChild(nodes[i+1]);
+        }
+    }
+}
+
+function clearSearch() {
+    const searchInput = document.getElementById('search-input');
+    const searchBar = document.getElementById('search-bar');
+    if (searchInput) searchInput.value = '';
+    removeAllHighlights();
+    searchMatches = [];
+    currentMatchIndex = -1;
+}
+
+async function performSearch(query) {
+    const contentViewer = document.getElementById('markdown-body');
+    const searchStatus = document.getElementById('search-status');
+    const searchBar = document.getElementById('search-bar');
+
+    if (!query) {
+        removeAllHighlights();
+        searchStatus.textContent = '0 / 0';
+        searchMatches = [];
+        currentMatchIndex = -1;
+        return;
+    }
+
+    removeAllHighlights();
+
+    const regex = new RegExp(`(${query})`, 'gi');
+    const walk = document.createTreeWalker(contentViewer, NodeFilter.SHOW_TEXT, null, false);
+    const textNodes = [];
+    let node;
+    while (node = walk.nextNode()) {
+        if (node.parentNode.tagName !== 'SCRIPT' && node.parentNode.tagName !== 'STYLE') {
+            textNodes.push(node);
+        }
+    }
+
+    // Process nodes in reverse to avoid index shifts
+    for (let i = textNodes.length - 1; i >= 0; i--) {
+        const textNode = textNodes[i];
+        const text = textNode.textContent;
+        if (regex.test(text)) {
+            const span = document.createElement('span');
+            span.innerHTML = text.replace(regex, '<span class=\"search-highlight\">$1</span>');
+            textNode.replaceWith(...span.childNodes);
+        }
+    }
+
+    searchMatches = Array.from(contentViewer.querySelectorAll('.search-highlight'));
+    currentMatchIndex = -1;
+
+    if (searchMatches.length > 0) {
+        updateSearchStatus();
+        goToNextMatch();
+    } else {
+        searchStatus.textContent = '0 / 0';
+    }
+}
+
+function updateSearchStatus() {
+    const searchStatus = document.getElementById('search-status');
+    if (searchMatches.length > 0) {
+        searchStatus.textContent = `${currentMatchIndex + 1} / ${searchMatches.length}`;
+    } else {
+        searchStatus.textContent = '0 / 0';
+    }
+}
+
+function goToNextMatch() {
+    if (searchMatches.length === 0) return;
+
+    if (currentMatchIndex >= 0) {
+        searchMatches[currentMatchIndex].classList.remove('search-highlight-active');
+    }
+
+    currentMatchIndex = (currentMatchIndex + 1) % searchMatches.length;
+    const activeMatch = searchMatches[currentMatchIndex];
+    activeMatch.classList.add('search-highlight-active');
+
+    activeMatch.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    updateSearchStatus();
+}
+
+function goToPrevMatch() {
+    if (searchMatches.length === 0) return;
+
+    if (currentMatchIndex >= 0) {
+        searchMatches[currentMatchIndex].classList.remove('search-highlight-active');
+    }
+
+    currentMatchIndex = (currentMatchIndex - 1 + searchMatches.length) % searchMatches.length;
+    const activeMatch = searchMatches[currentMatchIndex];
+    activeMatch.classList.add('search-highlight-active');
+
+    activeMatch.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    updateSearchStatus();
+}
