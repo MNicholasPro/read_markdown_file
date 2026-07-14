@@ -298,6 +298,24 @@ body {
     opacity: 0.6;
 }
 
+.toc-item.depth-4 {
+    padding-left: 48px;
+    font-size: 10px;
+    opacity: 0.5;
+}
+
+.toc-item.depth-5 {
+    padding-left: 60px;
+    font-size: 10px;
+    opacity: 0.4;
+}
+
+.toc-item.depth-6 {
+    padding-left: 72px;
+    font-size: 10px;
+    opacity: 0.3;
+}
+
 .history-item {
     padding: 8px 12px;
     margin-bottom: 5px;

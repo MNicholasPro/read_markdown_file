@@ -286,7 +286,7 @@ function updateTOC() {
 
     tocList.innerHTML = '';
 
-    const headings = contentViewer.querySelectorAll('h1, h2, h3');
+    const headings = contentViewer.querySelectorAll('h1, h2, h3, h4, h5, h6');
     headings.forEach((heading, index) => {
         // Ensure heading has an ID for scrolling
         if (!heading.id) {
