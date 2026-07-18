@@ -51,6 +51,48 @@ let fileHistory = JSON.parse(localStorage.getItem('fileHistory') || '[]');
 let collections = JSON.parse(localStorage.getItem('fileCollections') || '[]');
 let activeView = 'history'; // 'history' or collectionId
 
+// Path Tooltip Element
+const pathTooltip = document.createElement('div');
+pathTooltip.id = 'path-tooltip';
+document.body.appendChild(pathTooltip);
+
+function showTooltip(e, name, path) {
+    pathTooltip.innerHTML = `<span class="tooltip-name">${name}</span><span class="tooltip-path">${path}</span>`;
+    pathTooltip.style.display = 'block';
+
+    // 强制浏览器计算当前样式（获取宽高）
+    const tooltipRect = pathTooltip.getBoundingClientRect();
+    const elementRect = e.target.getBoundingClientRect();
+
+    // 定位于文件的右下角
+    // left = 元素右边缘 - tooltip宽度
+    // top = 元素下边缘 - tooltip高度
+    let left = elementRect.right - tooltipRect.width;
+    let top = elementRect.bottom - tooltipRect.height;
+
+    // 边界检测：防止超出屏幕左侧或上方
+    left = Math.max(10, left);
+    top = Math.max(10, top);
+
+    pathTooltip.style.left = `${left}px`;
+    pathTooltip.style.top = `${top}px`;
+
+    // 触发淡入动画
+    requestAnimationFrame(() => {
+        pathTooltip.classList.add('visible');
+    });
+}
+
+function hideTooltip() {
+    pathTooltip.classList.remove('visible');
+    setTimeout(() => {
+        if (!pathTooltip.classList.contains('visible')) {
+            pathTooltip.style.display = 'none';
+        }
+    }, 300);
+}
+
+
 function saveCollections() {
     localStorage.setItem('fileCollections', JSON.stringify(collections));
 }
@@ -136,7 +178,9 @@ function renderDocumentList(items, isHistoryView) {
         const fileNameSpan = document.createElement('span');
         fileNameSpan.textContent = item.name;
         fileNameSpan.classList.add('file-name-tooltip');
-        fileNameSpan.setAttribute('data-full-path', `${item.name}\n${item.path}`);
+        fileNameSpan.onmouseover = (e) => showTooltip(e, item.name, item.path);
+        fileNameSpan.onmouseout = hideTooltip;
+
 
         content.appendChild(fileNameSpan);
 
